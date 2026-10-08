@@ -60,7 +60,7 @@ storyboard 的 `route` 事件带 `camera.follow` 即进入黄山式跟拍：
   3. 射线地形采样走 `queryTerrainElevation`（与渲染 mesh 同 tile 缓存=引擎遮挡真值同源），**v4.7.1 的 qte 返回已乘 TEX 的视觉海拔，比较时禁止再乘**；另加坡面朝向判定（heightfield 背向坡面必被邻脊遮挡=draped 线不渲染，但点射线可能通畅——背向时 icon 必须同淡）。
 - **车头徽章双保险**：symbol icon（引擎投影，质感主体）+ circle 底座（draped 通道，与原生线同渲染同遮挡）——symbol 在 z12 mesh 会被引擎 LOD 剔除（720p 消失/1080p 出现=视口依赖判例），circle 底座保证「线头可见处必有标记」，小样 360 帧徽章 0 缺失。
 - **信息陈设豁免净空**：tag/解读卡只受事件时间窗控制（位置由 GL 投影锁死=不飘），不做净空淡隐——景点锚点常贴崖壁（百龙下站 570m vs 身后 874m 崖=射线擦崖误杀，hold 解读拍卡消失判例）。
-- **闪烁军规**（主人「车闪/聚焦时山重绘」判词后立）：
+- **闪烁军规**（「车闪/聚焦时山重绘」两轮判死后立）：
   1. 净空 verdict 翻摆只许表现为 alpha 涟漪，不许整帧隐现——visMul 交叉淡 0.8s/6 采样；
   2. **circle 底座不吃 visMul**（draped 元素引擎自管遮挡，叠自研净空只会引入误杀闪烁；f158 判例：±30m qte 梯度抓到小土丘法向判背向，但引擎同帧线头清晰可见=误杀，traveller 整帧消失=「车闪」本体——坡面朝向判定因此废弃）；
   3. **hold 显式 bearing 贴近跟拍末端切向**（默认 baseBearing 与末端切向差 78°/1.6s=54°/s 甩鞭=「聚焦时重绘感」一半本体；现 26°/2.2s≤19°/s）；
@@ -83,7 +83,7 @@ storyboard 的 `route` 事件带 `camera.follow` 即进入黄山式跟拍：
 
 最小无代码示例在 `examples/huangshan-route/`（真实步道折线）。第二个非黄山夹具 `examples/jiuzhaigou-route/` 证明：复制示例只改三份 JSON、跑 `fetch-tiles`，即可生成另一景区的 3D 路线视频，项目目录不新增 Python、HTML 或 JS。示例瓦片不进入 git，用 `fetch-tiles` 重建。
 
-**跟拍模式标准案例 `examples/wulingyuan-follow-route/`**（2026-09-10 主人终审通过）：17s 含全部事件类型（开场建立/跟拍生长/景点 tag/走过点亮/到达拍 hold+光圈+解读卡），配套制作指导 `FOLLOW_ROUTE_GUIDE.md`（从剧本到成片 SOP：三份 JSON 语义、跟拍与到达拍配方、旁白句界节奏、渲染 QA 三连、判例速查、新目的地接入清单）。做路线预演镜头从这里起步，不要从零配。
+**跟拍模式标准案例 `examples/wulingyuan-follow-route/`**（含全部事件类型实战验证）：17s 含全部事件类型（开场建立/跟拍生长/景点 tag/走过点亮/到达拍 hold+光圈+解读卡），配套制作指导 `docs/craft/FOLLOW_ROUTE.md`（仓根 docs：三份 JSON 语义、跟拍与到达拍配方、旁白句界节奏、渲染 QA、判例速查、新目的地接入清单）。做路线预演镜头从这里起步，不要从零配。
 
 ### 渲染器能力开关与 4K 档判例
 
@@ -96,7 +96,7 @@ storyboard 的 `route` 事件带 `camera.follow` 即进入黄山式跟拍：
 
 ### 城市能力（水面染色/通透度/楼宇真实感/地标识别/goldfix；南京 showcase 验证）
 
-- **水面层 v2「染色不覆盖」**：`map.sources.water=geojson 多边形` + `map.waterStyle{color,opacity,sheen}`。主人判词：浅蓝白镜面满铺=牛奶假水判死——水体主导色是水本身青绿，天空镜面只是局部高光。深青绿低透明染色+随 zoom 衰减（高空江河保泥沙真色，低空湖面出青绿），sheen 默认 0。**inner 环 MUST 挖孔**（湖心岛/江心洲，可用 Overpass `out geom` 抓取后按正解处理）；流动/波纹判死线不变。Overpass 判例：`out geom` relation member 几何内联在 `members[].geometry`，读顶层 way 元素=漏抓（玄武湖判例）。
+- **水面层 v2「染色不覆盖」**：`map.sources.water=geojson 多边形` + `map.waterStyle{color,opacity,sheen}`。浅蓝白镜面满铺=牛奶假水判死——水体主导色是水本身青绿，天空镜面只是局部高光。深青绿低透明染色+随 zoom 衰减（高空江河保泥沙真色，低空湖面出青绿），sheen 默认 0。**inner 环 MUST 挖孔**（湖心岛/江心洲，可用 Overpass `out geom` 抓取后按正解处理）；流动/波纹判死线不变。Overpass 判例：`out geom` relation member 几何内联在 `members[].geometry`，读顶层 way 元素=漏抓（实测踩坑）。
 - **城市通透度**：「拉远雾蒙蒙」根因=城市卫星底图本身灰，不是 haze（hz 归零实测变化甚微）——通透来自 raster sat/con + cf 滤镜三连，城市预设 hz=0。
 - **楼宇真实感**：色域收窄到屋顶暖米灰四档（`buildingStyle.color0-3`）+opacity .72 微透卫星屋顶+heightX .8 压 OSM 高估楼高（「均质灰盒子=假」判词）。**地标识别**：Feature `properties.lm`+真实 h → landmarkColor 亮金+landmarkHeightX；名牌用 storyboard `marker/callout(leader:true)` 不造引擎标签。
 - **金色反向补偿 goldfix（默认开）**：cfAlt 的 hue-rotate 是 canvas 全局滤镜，GL 烘焙金色（callout 标题/光圈/金点/徽章金边）被带偏 +θ 成黄绿。现烘焙/设色预先 -θ 补偿：文字/图标按 θ 三档烘备变体逐帧就近切换，circle 层 setPaintProperty 逐帧精确补偿。`goldfix=0` 回退。EP6 折多山垭口同帧对比：补偿后纯金、未补偿黄绿。
