@@ -19,6 +19,7 @@ import threading
 from pathlib import Path
 
 WEB = Path(__file__).resolve().parent / "web"
+FONTS = Path(__file__).resolve().parents[3] / "assets" / "fonts"   # packages/map_studio/mapstudio/ → 仓根
 TILE_PATH_RE = re.compile(r"^(.*)/(\d+)/(\d+)/(\d+)\.(jpg|png)$")
 
 
@@ -49,6 +50,8 @@ def make_handler(project_dir: Path):
                 return str(WEB / "route_renderer.html")
             if p.startswith("lib/"):
                 return str(WEB / p)
+            if p.startswith("fonts/"):
+                return str(FONTS / p[len("fonts/"):])
             if p == "compiled.json":
                 return str(project_dir / "output" / "compiled.json")
             return str(project_dir / p)

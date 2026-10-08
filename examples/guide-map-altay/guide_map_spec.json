@@ -1,0 +1,583 @@
+{
+ "comment": "EP10 阿勒泰 星型换乘拓扑——guide_map 管线 v1（2026-09-26 主人地图判词后重做：E terrain_block 判死→G 卫星洗纸；rawGeo 真实路网+rotate90:false 两增强首用）。总览=拓扑结构认知（非时刻表跟走），面板=四放射线+判决。",
+ "bbox": [
+  86.74,
+  48.46,
+  87.5,
+  48.81
+ ],
+ "locationsFile": "map/locations.json",
+ "routes": {
+  "bus": {},
+  "walk": {},
+  "rawGeoFile": "rawGeo.geojson"
+ },
+ "waters": {
+  "file": "waters_hand.json",
+  "colors": {
+   "kanas_lake": [
+    70,
+    178,
+    170,
+    235
+   ],
+   "kanas_river": [
+    70,
+    178,
+    170,
+    225
+   ]
+  },
+  "defaultColor": [
+   70,
+   178,
+   170,
+   235
+  ],
+  "outline": 3
+ },
+ "wash": {
+  "blur": 1.6,
+  "desat": 0.62,
+  "brightenMul": 1.08,
+  "brightenAdd": 7,
+  "localContrast": 0.76,
+  "warmR": 1.03,
+  "warmB": 0.97
+ },
+ "frame": {
+  "mapW": 1990,
+  "canvasW": 2560,
+  "canvasH": 1440,
+  "margin": 460,
+  "rotate90": false
+ },
+ "inset": {
+  "bbox": [
+   86.998,
+   48.606,
+   87.062,
+   48.722
+  ],
+  "scale": 0.62,
+  "at": [
+   1180,
+   120
+  ],
+  "chrome": "喀纳斯核心区 · 实景放大",
+  "extraBrighten": true
+ },
+ "colors": {
+  "gold": "#e8a82e",
+  "goldSat": "#EEBC44",
+  "goldSoft": "#F2C879",
+  "teal": "#6EC8D4",
+  "green": "#5FA85F",
+  "warn": "#FF8C78",
+  "orange": "#f08030",
+  "gray": "#8a9098",
+  "mute": "#B7C4BC"
+ },
+ "overview": {
+  "title": "喀纳斯 · 星型换乘拓扑",
+  "subtitle": "所有车 · 回一个地方换",
+  "valleyNames": [],
+  "mainStops": [
+   {
+    "key": "jiadengyu-gate",
+    "n": "1",
+    "time": "08:00",
+    "name": "贾登峪门票站",
+    "desc": "",
+    "color": "gold",
+    "labelAt": [
+     -24,
+     44,
+     "end"
+    ]
+   },
+   {
+    "key": "transfer-center",
+    "n": "2",
+    "time": "",
+    "name": "换乘中心",
+    "desc": "",
+    "color": "goldSat",
+    "badgeOnly": true
+   },
+   {
+    "key": "wolongwan",
+    "n": "3",
+    "time": "",
+    "name": "三湾",
+    "desc": "",
+    "color": "green",
+    "labelAt": [
+     20,
+     44,
+     "start"
+    ]
+   },
+   {
+    "key": "kanas-lake-dock",
+    "n": "4",
+    "time": "",
+    "name": "喀纳斯湖",
+    "desc": "",
+    "color": "gold",
+    "labelAt": [
+     -70,
+     -180,
+     "end"
+    ]
+   },
+   {
+    "key": "kanas-jiucun",
+    "n": "5",
+    "time": "",
+    "name": "老村新村",
+    "desc": "",
+    "color": "teal",
+    "badgeOnly": true
+   },
+   {
+    "key": "baihaba-village",
+    "n": "6",
+    "time": "",
+    "name": "白哈巴",
+    "desc": "",
+    "color": "warn",
+    "labelAt": [
+     30,
+     -40,
+     "start"
+    ]
+   }
+  ],
+  "dots": [
+   {
+    "key": "shenxianwan",
+    "n": "·"
+   },
+   {
+    "key": "yueliangwan",
+    "n": "·"
+   },
+   {
+    "key": "guanyutai",
+    "n": "×"
+   },
+   {
+    "key": "hemu-village",
+    "n": "禾"
+   }
+  ],
+  "insetStops": [
+   {
+    "key": "in_transfer-center",
+    "n": "2",
+    "time": "",
+    "name": "换乘中心",
+    "desc": "",
+    "color": "goldSat",
+    "labelAt": [
+     -30,
+     -56,
+     "end"
+    ]
+   },
+   {
+    "key": "in_shenxianwan",
+    "n": "3",
+    "time": "",
+    "name": "神仙湾",
+    "desc": "晨雾 06:30-08:00",
+    "color": "green",
+    "labelAt": [
+     -20,
+     -48,
+     "end"
+    ]
+   },
+   {
+    "key": "in_yueliangwan",
+    "n": "3",
+    "time": "",
+    "name": "月亮湾",
+    "desc": "",
+    "color": "green",
+    "labelAt": [
+     -20,
+     -44,
+     "end"
+    ]
+   },
+   {
+    "key": "in_wolongwan",
+    "n": "3",
+    "time": "",
+    "name": "卧龙湾",
+    "desc": "",
+    "color": "green",
+    "labelAt": [
+     -24,
+     40,
+     "end"
+    ]
+   },
+   {
+    "key": "in_kanas-jiucun",
+    "n": "5",
+    "time": "",
+    "name": "老村",
+    "desc": "",
+    "color": "teal",
+    "badgeOnly": true
+   },
+   {
+    "key": "in_kanas-lake-dock",
+    "n": "4",
+    "badgeOnly": true,
+    "color": "gold"
+   }
+  ],
+  "notes": [
+   {
+    "key": "guanyutai",
+    "text": "观鱼台 · 2025-10-07 起关闭",
+    "dx": 20,
+    "dy": -30,
+    "anchor": "start",
+    "color": "gray"
+   },
+   {
+    "key": "hemu-village",
+    "text": "禾木村 · 哈登台日出 ~08:00",
+    "dx": 18,
+    "dy": -50,
+    "anchor": "start",
+    "color": "teal"
+   }
+  ],
+  "legend": [],
+  "panel": {
+   "head": "星型换乘拓扑",
+   "sub": "1 主线 + 4 放射 · 景点之间不通车",
+   "rows": [
+    [
+     "1",
+     "08:00",
+     "贾登峪门票站",
+     "主线拉到换乘中心 · 19:00 停止入园",
+     "gold"
+    ],
+    [
+     "2",
+     "枢纽",
+     "换乘中心",
+     "所有车回这里换 · 旺季一队四五十分钟",
+     "goldSat"
+    ],
+    [
+     "3",
+     "早上",
+     "三湾线",
+     "神仙湾/月亮湾/卧龙湾 · 先奔最远的",
+     "green"
+    ],
+    [
+     "4",
+     "下午",
+     "湖线",
+     "喀纳斯湖码头 · 回来看湖",
+     "gold"
+    ],
+    [
+     "5",
+     "住这",
+     "村里线",
+     "老村/新村 · 晨雾只能住村里",
+     "teal"
+    ],
+    [
+     "6",
+     "劝退",
+     "白哈巴线",
+     "75+边防证+禁飞 · 只玩一两天别去",
+     "warn"
+    ],
+    [
+     "判",
+     "",
+     "先远后近",
+     "顺序就是钱 · 省半天",
+     "goldSat"
+    ]
+   ],
+   "legend": [
+    {
+     "color": "gold",
+     "text": "主线 · 湖线（金）"
+    },
+    {
+     "color": "green",
+     "text": "三湾线（绿）"
+    },
+    {
+     "color": "teal",
+     "text": "村里线（青）"
+    },
+    {
+     "color": "warn",
+     "text": "白哈巴线（红）"
+    }
+   ]
+  },
+  "s6Banner": {
+   "title": "截图存好 · 到了照着走",
+   "sub": "票价与政策核验于 2026-09-26 · 以景区公告为准",
+   "at": [
+    90,
+    1280
+   ]
+  }
+ },
+ "beats": {
+  "beat_s0_deadline": {
+   "bbox": [
+    86.88,
+    48.47,
+    87.26,
+    48.7
+   ],
+   "rot": false,
+   "tl": 1,
+   "tag": "S0 · 头班车 08:00 · 赶不上晨雾",
+   "cur": [
+    "jiadengyu-gate",
+    "1",
+    "08:00",
+    "贾登峪门票站",
+    "头班车才发 · 神仙湾雾已散",
+    "warn",
+    [
+     -34,
+     44,
+     "end"
+    ]
+   ],
+   "done": [],
+   "leg": [
+    "main",
+    "jiadengyu-gate",
+    "shenxianwan",
+    "bus"
+   ],
+   "doneStops": [],
+   "todoStops": [
+    [
+     "shenxianwan",
+     "神仙湾 · 晨雾 06:30-08:00"
+    ],
+    [
+     "yueliangwan",
+     "月亮湾"
+    ],
+    [
+     "wolongwan",
+     "卧龙湾"
+    ]
+   ],
+   "bias": [
+    0.5,
+    0.88
+   ]
+  },
+  "beat_s2_stay": {
+   "bbox": [
+    86.921,
+    48.485,
+    87.251,
+    48.732
+   ],
+   "rot": false,
+   "tl": 5,
+   "tag": "S2 · 住哪 = 晨雾死线",
+   "cur": [
+    "kanas-jiucun",
+    "5",
+    "",
+    "住村里",
+    "多花的钱 = 早上六点半的雾",
+    "teal",
+    [
+     34,
+     -48,
+     "start"
+    ]
+   ],
+   "done": [],
+   "leg": [
+    "main",
+    "jiadengyu-stay",
+    "kanas-jiucun",
+    "bus"
+   ],
+   "doneStops": [],
+   "todoStops": [
+    [
+     "jiadengyu-stay",
+     "贾登峪 · 住村外 288-800"
+    ],
+    [
+     "kanas-xincun",
+     "新村"
+    ],
+    [
+     "shenxianwan",
+     "神仙湾晨雾"
+    ]
+   ],
+   "bias": [
+    0.5,
+    0.12
+   ],
+   "comment": "【v4 主人判词：核心路线内容居中】取景重定——全 leg 贾登峪(48.493)→老村(48.70) 入画（旧取景 walker 前 60% 行程在画外+右半幅空山）；bbox 中心=leg 中点 87.086，bias y=0.12 cur 老村置顶"
+  },
+  "beat_s3_villages": {
+   "bbox": [
+    86.74,
+    48.46,
+    87.5,
+    48.77
+   ],
+   "rot": false,
+   "tl": 4,
+   "tag": "S3 · 三村取舍",
+   "cur": [
+    "kanas-lake-dock",
+    "4",
+    "",
+    "喀纳斯是主菜",
+    "至少留一整天",
+    "gold",
+    [
+     34,
+     -44,
+     "start"
+    ]
+   ],
+   "done": [],
+   "leg": [
+    "spoke_lake",
+    "transfer-center",
+    "kanas-lake-dock",
+    "bus"
+   ],
+   "doneStops": [
+    [
+     "hemu-village",
+     "禾",
+     "禾木 +1 晚 · 哈登台日出"
+    ]
+   ],
+   "todoStops": [
+    [
+     "baihaba-village",
+     "白哈巴 · 只玩一两天别去"
+    ],
+    [
+     "transfer-center",
+     "换乘中心"
+    ]
+   ]
+  }
+ },
+ "dayPath": [
+  {
+   "seg": "main",
+   "from": "jiadengyu-gate",
+   "to": "transfer-center",
+   "mode": "bus"
+  },
+  {
+   "seg": "spoke_sanwan",
+   "from": "transfer-center",
+   "to": "wolongwan",
+   "mode": "bus"
+  },
+  {
+   "seg": "spoke_lake",
+   "from": "transfer-center",
+   "to": "kanas-lake-dock",
+   "mode": "bus"
+  },
+  {
+   "seg": "spoke_villages",
+   "from": "transfer-center",
+   "to": "kanas-jiucun",
+   "mode": "bus"
+  },
+  {
+   "seg": "spoke_baihaba",
+   "from": "transfer-center",
+   "to": "baihaba-village",
+   "mode": "bus"
+  }
+ ],
+ "anim": {
+  "fps": 30,
+  "reveal": {
+   "dur": 9.2,
+   "traceEnd": 3.4,
+   "holdPer": 0.85,
+   "fade": 0.25
+  },
+  "beatDur": {
+   "default": 3.2,
+   "beat_s0_deadline": 5.8,
+   "beat_s2_stay": 9.0,
+   "beat_s3_villages": 4.5
+  },
+  "s6card": {
+   "dur": 8.0,
+   "zoom": 1.04,
+   "center": [
+    995,
+    700
+   ]
+  }
+ },
+ "fx": {
+  "cross": {
+   "a": "yueliangwan",
+   "b": "kanas-lake-dock",
+   "dur": 5.4
+  },
+  "gray": {
+   "route": "spoke_baihaba",
+   "stop": "baihaba-village",
+   "dur": 9.0,
+   "zoom": [
+    1.0,
+    1.035
+   ],
+   "stopN": "6",
+   "stopName": "白哈巴",
+   "labelAt": [
+    30,
+    -40,
+    "start"
+   ]
+  },
+  "half": {
+   "route": "spoke_baihaba",
+   "stop": "baihaba-village",
+   "dur": 4.0,
+   "zoom": [
+    1.035,
+    1.04
+   ]
+  }
+ }
+}

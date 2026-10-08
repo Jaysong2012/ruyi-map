@@ -1,0 +1,15 @@
+{
+  "comment": "EP9 稻城亚丁地图节点——坐标继承 EP6 map-main（已勘验真实空间关系），牛奶海/五色海与 OSM way/292441041、way/292437519 互证一致。coordinates=[lng,lat]",
+  "locations": [
+    {"id": "xianggelila", "name": "香格里拉镇", "coordinates": [100.34812, 28.56184], "kind": "stay"},
+    {"id": "yading-vc", "name": "游客中心", "coordinates": [100.31543, 28.5396], "kind": "entry"},
+    {"id": "yading-village", "name": "亚丁村", "coordinates": [100.33854, 28.45762], "kind": "stay"},
+    {"id": "zhaguanbeng", "name": "观光车终点", "coordinates": [100.35545, 28.43414], "kind": "station"},
+    {"id": "chonggusi", "name": "冲古寺", "coordinates": [100.35663, 28.4311], "kind": "junction"},
+    {"id": "zhenzhuhai", "name": "珍珠海", "coordinates": [100.35151, 28.42517], "kind": "spot"},
+    {"id": "luorong", "name": "洛绒牛场", "coordinates": [100.37976, 28.3909], "kind": "station"},
+    {"id": "gonggacuo", "name": "马帮终点", "coordinates": [100.3620, 28.3830], "kind": "station", "note": "贡嘎措·坐标近似待卫星底图校准"},
+    {"id": "niunaihai", "name": "牛奶海", "coordinates": [100.34673, 28.37448], "kind": "spot"},
+    {"id": "wusehai", "name": "五色海", "coordinates": [100.3539, 28.38036], "kind": "spot"}
+  ]
+}

@@ -3,29 +3,31 @@
      时间语义：window.__setT(t) 是纯函数——相同 t 必然得到相同画面，供逐帧确定性渲染。 -->
 <html><head><meta charset="utf-8"><link rel="stylesheet" href="/lib/maplibre-gl.css">
 <style>
+@font-face{font-family:'RuyiSmiley';src:url('/fonts/SmileySans-Oblique.ttf') format('truetype')}
+@font-face{font-family:'RuyiZcool';src:url('/fonts/ZCOOLQingKeHuangYou-Regular.ttf') format('truetype')}
 html,body,#map{margin:0;width:100%;height:100%;overflow:hidden;background:#0a1410}.maplibregl-ctrl{display:none}
 .ol{position:absolute;left:0;top:0}
 #map canvas{filter:saturate(1.04) contrast(1.03) brightness(.97)}
 #grade{position:absolute;inset:0;pointer-events:none;background:linear-gradient(180deg,rgba(4,8,10,.05),transparent 35%,rgba(3,6,8,.09));box-shadow:inset 0 0 120px rgba(0,0,0,.20)}
 #haze{position:absolute;inset:0;pointer-events:none}
-#title{position:absolute;left:54px;top:44px;color:#fff;font:700 42px/1.12 "PingFang SC",sans-serif;text-shadow:0 3px 18px #000;opacity:0}
-#title small{display:block;margin-top:10px;color:#d6e9df;font:500 22px/1.2 "PingFang SC",sans-serif;letter-spacing:2px}
-#legend{position:absolute;left:54px;bottom:44px;display:flex;gap:12px;opacity:0;font-family:"PingFang SC",sans-serif}
+#title{position:absolute;left:54px;top:44px;color:#fff;font:700 42px/1.12 "RuyiSmiley",sans-serif;text-shadow:0 3px 18px #000;opacity:0}
+#title small{display:block;margin-top:10px;color:#d6e9df;font:500 22px/1.2 "RuyiSmiley",sans-serif;letter-spacing:2px}
+#legend{position:absolute;left:54px;bottom:44px;display:flex;gap:12px;opacity:0;font-family:"RuyiSmiley",sans-serif}
 .pill{font-size:18px;font-weight:650;color:#fff;background:rgba(3,13,12,.82);border:1px solid rgba(255,255,255,.14);border-radius:10px;padding:9px 14px;box-shadow:0 4px 18px rgba(0,0,0,.35);white-space:nowrap}
 .pill b{display:inline-block;width:22px;height:5px;border-radius:5px;margin-right:9px;vertical-align:middle}
-.tag{font-family:"PingFang SC",sans-serif;font-size:15px;font-weight:650;color:#fff;background:rgba(3,13,12,.82);border:1px solid rgba(255,255,255,.14);border-radius:10px;padding:9px 14px;box-shadow:0 4px 18px rgba(0,0,0,.35);white-space:nowrap;opacity:0;text-shadow:0 2px 8px #000}
+.tag{font-family:"RuyiSmiley",sans-serif;font-size:15px;font-weight:650;color:#fff;background:rgba(3,13,12,.82);border:1px solid rgba(255,255,255,.14);border-radius:10px;padding:9px 14px;box-shadow:0 4px 18px rgba(0,0,0,.35);white-space:nowrap;opacity:0;text-shadow:0 2px 8px #000}
 .tag.stay{border-color:#ff7d72;color:#fff0ec}.tag.entry{border-color:#66e2ad}.tag.exit{border-color:#61c7ff}
 .hiker-wrap{width:42px;height:56px;filter:drop-shadow(0 4px 6px rgba(0,0,0,.72))}.hiker{width:42px;height:56px;opacity:0;transform-origin:50% 100%}
 .pulse{position:relative;width:14px;height:14px;opacity:0;pointer-events:none}.pulse .core{position:absolute;inset:0;border-radius:50%;background:#fff7c7;border:2px solid #fff;box-shadow:0 0 24px 9px rgba(255,184,52,.95)}.pulse .ring{position:absolute;left:50%;top:50%;width:28px;height:28px;margin:-14px;border:4px solid #ffd166;border-radius:50%;box-shadow:0 0 18px 3px rgba(255,174,43,.72);opacity:0}
-.callout-marker{width:1px;height:1px}.callout{position:absolute;width:1px;height:1px;opacity:0;font-family:"PingFang SC",sans-serif;color:#fff}.callout .pin{position:absolute;left:-7px;top:-7px;width:14px;height:14px;border-radius:50%;background:#ffd56a;border:3px solid #fff;box-shadow:0 0 0 5px rgba(255,213,106,.25),0 2px 8px #000}.callout .lead{position:absolute;top:-2px;width:112px;height:4px;background:#ffd56a;box-shadow:0 1px 6px #000}.callout .lead:after{content:"";position:absolute;top:-7px;border-top:9px solid transparent;border-bottom:9px solid transparent}.callout .card{position:absolute;bottom:20px;width:218px;padding:10px 13px;border-radius:9px;background:rgba(3,13,12,.92);border:1px solid rgba(255,213,106,.72);box-shadow:0 5px 22px rgba(0,0,0,.48);font-size:14px;line-height:1.4}.callout .card b{display:block;color:#ffd56a;font-size:18px;margin-bottom:2px}.callout .card i{display:block;font-style:normal}.callout.left .lead{right:0}.callout.left .lead:after{right:-2px;border-left:11px solid #ffd56a}.callout.left .card{right:122px}.callout.right .lead{left:0}.callout.right .lead:after{left:-2px;border-right:11px solid #ffd56a}.callout.right .card{left:122px}
-#hud{position:absolute;right:46px;top:42px;min-width:340px;padding:20px 26px;border-radius:16px;color:#fff;background:rgba(3,13,12,.86);border:1px solid rgba(255,255,255,.18);font-family:"PingFang SC",sans-serif;opacity:0;box-shadow:0 5px 24px rgba(0,0,0,.4)}#hud b{display:block;font-size:42px}#hud span{display:block;margin-top:6px;color:#d6e9df;font-size:28px}
-#credit{position:absolute;right:18px;bottom:13px;color:rgba(255,255,255,.78);font:12px "PingFang SC",sans-serif;text-shadow:0 1px 4px #000}
+.callout-marker{width:1px;height:1px}.callout{position:absolute;width:1px;height:1px;opacity:0;font-family:"RuyiSmiley",sans-serif;color:#fff}.callout .pin{position:absolute;left:-7px;top:-7px;width:14px;height:14px;border-radius:50%;background:#ffd56a;border:3px solid #fff;box-shadow:0 0 0 5px rgba(255,213,106,.25),0 2px 8px #000}.callout .lead{position:absolute;top:-2px;width:112px;height:4px;background:#ffd56a;box-shadow:0 1px 6px #000}.callout .lead:after{content:"";position:absolute;top:-7px;border-top:9px solid transparent;border-bottom:9px solid transparent}.callout .card{position:absolute;bottom:20px;width:218px;padding:10px 13px;border-radius:9px;background:rgba(3,13,12,.92);border:1px solid rgba(255,213,106,.72);box-shadow:0 5px 22px rgba(0,0,0,.48);font-size:14px;line-height:1.4}.callout .card b{display:block;color:#ffd56a;font-size:18px;margin-bottom:2px}.callout .card i{display:block;font-style:normal}.callout.left .lead{right:0}.callout.left .lead:after{right:-2px;border-left:11px solid #ffd56a}.callout.left .card{right:122px}.callout.right .lead{left:0}.callout.right .lead:after{left:-2px;border-right:11px solid #ffd56a}.callout.right .card{left:122px}
+#hud{position:absolute;right:46px;top:42px;min-width:340px;padding:20px 26px;border-radius:16px;color:#fff;background:rgba(3,13,12,.86);border:1px solid rgba(255,255,255,.18);font-family:"RuyiSmiley",sans-serif;opacity:0;box-shadow:0 5px 24px rgba(0,0,0,.4)}#hud b{display:block;font-size:42px}#hud span{display:block;margin-top:6px;color:#d6e9df;font-size:28px}
+#credit{position:absolute;right:18px;bottom:13px;color:rgba(255,255,255,.78);font:12px "RuyiSmiley",sans-serif;text-shadow:0 1px 4px #000}
 /* 信息面板层（EP7 2026-09-23 主人裁决：带时间点位不在地图上写字——金色箭头指向准确位置+景区外解读卡）*/
 .pv-card{position:absolute;box-sizing:border-box;padding:9px 14px;border-radius:12px;background:linear-gradient(150deg,rgba(7,26,24,.9),rgba(3,14,12,.82));border:1px solid rgba(255,214,122,.4);box-shadow:0 6px 22px rgba(0,0,0,.42);opacity:0;will-change:opacity,transform}
 .pv-t{display:flex;align-items:baseline;gap:8px;white-space:nowrap}
 .pv-tm{font:700 15px ui-monospace,monospace;color:#ffd56a;letter-spacing:.5px}
-.pv-nm{font:700 17px "PingFang SC",sans-serif;color:#fff;text-shadow:0 1px 6px #000}
-.pv-lk{margin-top:4px;font:500 11.5px/1.4 "PingFang SC",sans-serif;color:rgba(255,255,255,.8)}
+.pv-nm{font:700 17px "RuyiSmiley",sans-serif;color:#fff;text-shadow:0 1px 6px #000}
+.pv-lk{margin-top:4px;font:500 11.5px/1.4 "RuyiSmiley",sans-serif;color:rgba(255,255,255,.8)}
 .pv-card.on{border-color:rgba(255,216,128,.95);background:linear-gradient(150deg,rgba(40,33,8,.94),rgba(8,22,17,.86));box-shadow:0 0 0 1px rgba(255,214,122,.35),0 0 30px rgba(255,180,60,.38),0 6px 22px rgba(0,0,0,.45)}
 </style></head><body>
 <div id="map"></div><div id="grade"></div><div id="haze"></div>
@@ -309,12 +311,12 @@ map.on('load',async()=>{
       const sizes=grow?[[14,1],[62,2]]:[[45,1]]; // [字号,态]：grow 态1=14px 纯黑（一半大小贴图），态2=62px 走到放大
       tagImgs[i]={ev:e,loc,W:0,H:0,n:chars.length};
       sizes.forEach(([FS,ST])=>{
-        const cv=document.createElement('canvas'),m=cv.getContext('2d');m.font=`700 ${FS}px "PingFang SC",sans-serif`;const tw=Math.ceil(m.measureText(t).width),W=tw+24,H=Math.round(FS*64/45);
+        const cv=document.createElement('canvas'),m=cv.getContext('2d');m.font=`700 ${FS}px "RuyiSmiley",sans-serif`;const tw=Math.ceil(m.measureText(t).width),W=tw+24,H=Math.round(FS*64/45);
         if(W>tagImgs[i].W){tagImgs[i].W=W;tagImgs[i].H=H}
         const LD=grow?0:(e.leader?48:0); // grow: 无引线（主人判词「不要线指点」）；非 grow 原行为
         for(let k=1;k<=chars.length;k++){const s=chars.slice(0,k).join('');
           GOLDTH.forEach((th,vi)=>{const colV=hueRot(col,-th); // goldfix 变体
-          const im=txtImg((cx)=>{cx.font=`700 ${FS}px "PingFang SC",sans-serif`;cx.textBaseline='middle';cx.lineWidth=Math.round(FS*0.2);cx.lineJoin='round';
+          const im=txtImg((cx)=>{cx.font=`700 ${FS}px "RuyiSmiley",sans-serif`;cx.textBaseline='middle';cx.lineWidth=Math.round(FS*0.2);cx.lineJoin='round';
             if(grow&&ST===1){ // 常态小字：黑字+白描边（主人定色黑；暗底看不清的病根=描边太弱不是颜色——白描边让黑字在任何底上立起来，地图标注经典做法）
               cx.strokeStyle='rgba(248,250,248,.92)';cx.lineWidth=Math.round(FS*0.22);cx.lineJoin='round';cx.strokeText(s,12,H/2+1);
               cx.fillStyle='#111';cx.fillText(s,12,H/2+1)}
@@ -324,14 +326,14 @@ map.on('load',async()=>{
     // 解读卡（标题金+正文白，描边无框，标题先打完正文接力）
     const coImgs={};
     EVENTS.filter(e=>e.type==='callout'&&LOCS[e.location]).forEach((e,i)=>{const loc=LOCS[e.location],T=e.title||loc.name,B=e.body||'',tc=Array.from(T),bc=Array.from(B);
-      const cv=document.createElement('canvas'),m=cv.getContext('2d');m.font='700 57px "PingFang SC",sans-serif';const tw1=m.measureText(T).width;m.font='500 40px "PingFang SC",sans-serif';const tw2=m.measureText(B).width;
+      const cv=document.createElement('canvas'),m=cv.getContext('2d');m.font='700 57px "RuyiSmiley",sans-serif';const tw1=m.measureText(T).width;m.font='500 40px "RuyiSmiley",sans-serif';const tw2=m.measureText(B).width;
       const W=Math.ceil(Math.max(tw1,tw2))+24,H=57+40+52;
       const LD=e.leader?48:0;coImgs[i]={ev:e,loc,W,H:H+LD,nT:tc.length,n:tc.length+bc.length};
       for(let k=1;k<=tc.length+bc.length;k++){const sT=tc.slice(0,Math.min(k,tc.length)).join(''),sB=k>tc.length?bc.slice(0,k-tc.length).join(''):'';
         GOLDTH.forEach((th,vi)=>{const goldV=hueRot('#ffd56a',-th); // goldfix 变体
         const im=txtImg((cx)=>{cx.textBaseline='middle';cx.lineJoin='round';
-          cx.font='700 57px "PingFang SC",sans-serif';cx.lineWidth=10;cx.strokeStyle='rgba(2,10,9,.9)';cx.strokeText(sT,12,34);cx.fillStyle=goldV;cx.fillText(sT,12,34);
-          if(sB){cx.font='500 40px "PingFang SC",sans-serif';cx.lineWidth=8;cx.strokeStyle='rgba(2,10,9,.88)';cx.strokeText(sB,12,34+52+20);cx.fillStyle='#fff';cx.fillText(sB,12,34+52+20)}if(LD)drawLead(cx,W,H,LD,goldV)},W,H+LD);
+          cx.font='700 57px "RuyiSmiley",sans-serif';cx.lineWidth=10;cx.strokeStyle='rgba(2,10,9,.9)';cx.strokeText(sT,12,34);cx.fillStyle=goldV;cx.fillText(sT,12,34);
+          if(sB){cx.font='500 40px "RuyiSmiley",sans-serif';cx.lineWidth=8;cx.strokeStyle='rgba(2,10,9,.88)';cx.strokeText(sB,12,34+52+20);cx.fillStyle='#fff';cx.fillText(sB,12,34+52+20)}if(LD)drawLead(cx,W,H,LD,goldV)},W,H+LD);
         const nm='co-'+i+'-'+k+'v'+vi;map.addImage(nm,im);coImgs[i]['img'+k+'v'+vi]=nm})}});
     // 点亮金点（径向光斑，goldfix 变体）
     GOLDTH.forEach((th,vi)=>{map.addImage('lit-dot-v'+vi,txtImg((cx)=>{const g=cx.createRadialGradient(12,12,1,12,12,12);g.addColorStop(0,hexA(hueRot('#fff7c7',-th),1));g.addColorStop(.35,hexA(hueRot('#ffd166',-th),.95));g.addColorStop(.6,hexA(hueRot('#ffae2b',-th),.45));g.addColorStop(1,hexA(hueRot('#ffae2b',-th),0));cx.fillStyle=g;cx.fillRect(0,0,24,24)},24,24))});
@@ -364,7 +366,7 @@ map.on('load',async()=>{
   // ---- 信息面板层（EP7 2026-09-23 主人裁决：带时间点位不在地图上写字——金色箭头指向准确位置，景区外解读卡；锁机位=屏幕位静态，DOM/SVG 铁律例外见 routelayer=0 判例）----
   if(qnum('panels',0)){
     const PVS='http://www.w3.org/2000/svg';
-    const host=document.createElement('div');host.style.cssText='position:absolute;inset:0;pointer-events:none;font-family:"PingFang SC",sans-serif';document.body.appendChild(host);
+    const host=document.createElement('div');host.style.cssText='position:absolute;inset:0;pointer-events:none;font-family:"RuyiSmiley",sans-serif';document.body.appendChild(host);
     const svg=document.createElementNS(PVS,'svg');svg.setAttribute('style','position:absolute;inset:0;width:100%;height:100%;pointer-events:none');svg.setAttribute('viewBox',`0 0 ${OUT.width} ${OUT.height}`);svg.setAttribute('preserveAspectRatio','none');document.body.appendChild(svg);
     const defs=document.createElementNS(PVS,'defs');defs.innerHTML=`<linearGradient id="pvgrad" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#f0a828"/><stop offset="1" stop-color="#ffd56a"/></linearGradient><filter id="pvglow" x="-40%" y="-40%" width="180%" height="180%"><feGaussianBlur stdDeviation="2.4" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>`;
     svg.appendChild(defs);

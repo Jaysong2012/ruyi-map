@@ -1,4 +1,4 @@
-// 缓动曲线共享库（ruyi-studio 跨项目复用，无模块，<script src> 直接引入）。
+// 缓动曲线共享库（ruyi-map 跨管线复用，无模块，<script src> 直接引入）。
 // 2026-09-02 入库：此前 easeOut 立方体被复制粘贴到 6+ 个 viz 页（还漂变出指数
 // 2.2 等野生变体）、text_fx 一份、hud.js 一份 smoothstep、still_motion 全线性——
 // 四套方言收敛到本注册表（学 OpenCut 属性注册表思想；数值正本 TEMPLATES §六）。

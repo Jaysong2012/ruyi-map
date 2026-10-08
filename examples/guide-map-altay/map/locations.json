@@ -1,0 +1,33 @@
+{
+ "comment": "EP10 阿勒泰 locations v1（2026-09-26）——全部坐标 OSM 实锤（Overpass kumi 镜像 2026-09-26，ODbL），逐点登记 node id；禁止凭感觉标（张家界原标偏移判例）。kind: entry/hub/stay/spot/viewpoint/closed。",
+ "locations": [
+  {"id": "jiadengyu-gate", "name": "贾登峪门票站", "coordinates": [87.12793, 48.50637], "kind": "entry",
+   "source": "OSM node 4504753436 'Kanas Entrance' (tourism=information)"},
+  {"id": "jiadengyu-stay", "name": "贾登峪住宿带", "coordinates": [87.14800, 48.49270], "kind": "stay",
+   "source": "OSM hotel 节点簇重心（12911444301/13235653201/12020135470，87.1449-87.1678, 48.4924-48.5125）"},
+  {"id": "transfer-center", "name": "喀纳斯换乘中心", "coordinates": [87.02980, 48.69520], "kind": "hub",
+   "source": "铁喀段终点×喀东线起点 junction（way 36908235/80139158/80139767 端点）；警务站=换乘中心同址（facts #11，OSM node 5813998026 87.02535,48.69569 旁证）"},
+  {"id": "kanas-jiucun", "name": "喀纳斯老村", "coordinates": [87.03530, 48.69988], "kind": "stay",
+   "source": "OSM node 11988953712 '喀纳斯老村' (place=village)"},
+  {"id": "kanas-xincun", "name": "喀纳斯新村", "coordinates": [87.00338, 48.69456], "kind": "stay",
+   "source": "OSM node 11937230939 '喀纳斯新村' (place=village)"},
+  {"id": "shenxianwan", "name": "神仙湾", "coordinates": [87.03563, 48.65743], "kind": "spot",
+   "source": "OSM node 13235639301 viewpoint '1. Bay'；locality node 3812444693 (87.03412,48.65688) 互证"},
+  {"id": "yueliangwan", "name": "月亮湾", "coordinates": [87.04162, 48.62947], "kind": "spot",
+   "source": "OSM node 5813997972 '月亮湾' (place=locality)； viewpoint 簇 87.043-87.050 互证"},
+  {"id": "wolongwan", "name": "卧龙湾", "coordinates": [87.05156, 48.61976], "kind": "spot",
+   "source": "OSM node 5813997818 viewpoint '卧龙湾'；locality node 3812444691 (87.04873,48.61991) 互证"},
+  {"id": "kanas-lake-dock", "name": "喀纳斯湖码头", "coordinates": [87.02532, 48.71496], "kind": "spot",
+   "source": "OSM node 11185850138 '双湖游船码头'（湖口码头区）"},
+  {"id": "guanyutai", "name": "观鱼台", "coordinates": [86.99051, 48.72578], "kind": "closed",
+   "source": "OSM node 2970777553 viewpoint '观鱼台'；2025-10-07 起停运（facts #13）"},
+  {"id": "hemu-village", "name": "禾木村", "coordinates": [87.43037, 48.56921], "kind": "stay",
+   "source": "OSM node 6118572418 '禾木村' (place=village)"},
+  {"id": "hadeng-viewpoint", "name": "哈登观景台", "coordinates": [87.42650, 48.57648], "kind": "viewpoint",
+   "source": "OSM node 5813997796 '禾木村观景点' (tourism=viewpoint)=哈登观景台日出位（facts #10）"},
+  {"id": "baihaba-village", "name": "白哈巴村", "coordinates": [86.78161, 48.69320], "kind": "spot",
+   "source": "OSM node 12133189960 '白哈巴村' (place=village)"},
+  {"id": "hemu-transfer", "name": "禾木交通换乘中心", "coordinates": [87.45894, 48.57502], "kind": "hub",
+   "source": "OSM node 9916370018 '禾木交通换乘中心' (amenity=bus_station)；S3 背景参考"}
+ ]
+}
