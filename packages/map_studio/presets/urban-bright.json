@@ -1,0 +1,28 @@
+{
+  "schemaVersion": 1,
+  "name": "urban-bright",
+  "scope": "route_renderer.html（MapLibre 跟拍管线）城市片预设；与自然风景 green-lush-mountains 并列",
+  "status": "待主人目检 v2（2026-09-16 v1 三判词修正版：水/雾/楼；南京 map-urban-showcase v2 样片呈审，通过后转 DEFAULT）",
+  "description": "城市亮调通透预设 v2：城市攻略地图贩卖向往=通透、绿水、真楼。v1 判死后系统性修正：水的视觉主导色是水体本身青绿不是天空镜面（染色不覆盖）；通透度来自底图对比/饱和不是 haze（城市 haze=0）；楼宇色域收窄到屋顶色系+压低透明度+OSM 楼高打八折。四块原样并入 project.json 的 map。",
+  "grade": {
+    "sat": 0.08, "con": 0.10, "bmax": 1.0, "bmin": 0.02,
+    "vig": 0.13, "warm": 0.10,
+    "hz": 0.0, "hzc": "#e8f0f2",
+    "sunAz": 300, "sunAnchor": "map",
+    "cf": "saturate(1.18) contrast(1.10) brightness(1.02)"
+  },
+  "waterStyle": {"color": "#438b82", "opacity": 0.5, "sheen": 0},
+  "buildingStyle": {
+    "color0": "#ddd5c5", "color1": "#d4caba", "color2": "#c6bba8", "color3": "#b3a897",
+    "opacity": 0.72, "heightX": 0.8,
+    "landmarkColor": "#f2e3c2", "landmarkHeightX": 1.0
+  },
+  "boundaryStyle": {"color": "#e8c35a", "fill": 0.08, "opacity": 0.85, "fadeZoom": [11.0, 11.8]},
+  "rationale": {
+    "水": "主人判词「浅蓝白不是绿水」——高空俯瞰水体主导色=水本身青绿，天空镜面只是局部高光。正解=染色不覆盖：#438b82 深青绿 0.5 透明度染卫星水色，无 sheen；染色随 zoom 衰减（z9×0.1/z12×0.45/z14×1.0）——高空江河保泥沙真色（长江薄荷绿宽带=卫星图本色，实测定罪非染色层），低空湖面出九寨青绿。inner 环（湖心岛/江心洲）MUST 挖孔（fetch_water.py 判例），否则水色盖岛盖路",
+    "通透": "主人判词「拉远雾蒙蒙」——根因是城市卫星底图本身灰，不是 haze（hz 0.28→0 实测变化甚微）。通透度来自 raster contrast/sat/cf 滤镜三连（sat .08/con .10/cf saturate1.18 contrast1.10），城市 haze=0",
+    "楼": "主人判词「高楼不真实」——均质灰盒子=假的本体。色域收窄到屋顶暖米灰四档（实测屋顶 #646255，楼体取更亮受光面）、opacity .72 让卫星屋顶微透、heightX .8 压 OSM 普遍高估楼高；地标才用真实高度（紫峰 450m）+亮金色立起",
+    "hue": "城市不开 cfAlt hue-rotate（无荒凉山体误染问题），goldfix 不参与；混自然段开 cfAlt 时 goldfix 自动补偿"
+  },
+  "evidence": "projects/practical-guides/travel-guides/ep04-nanjing/map-urban-showcase v2（2026-09-16：V0-V7 八组扫参+卫星原色实测采样+长江 V0/V6 对照裁剪定罪）"
+}

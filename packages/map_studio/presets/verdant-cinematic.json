@@ -1,0 +1,13 @@
+{
+  "schemaVersion": 1,
+  "name": "verdant-cinematic",
+  "render": {"engine": "CYCLES", "samples": 64, "denoise": true},
+  "terrain": {"verticalExaggeration": 1.08, "microRelief": 0.03, "edgeTreatment": "camera-crop", "edgeFade": 0.0, "showBase": false},
+  "material": {"terrainTintStrength": 0.02, "textureHue": 0.50, "textureSaturation": 1.04, "textureValue": 1.08, "hillshadeStrength": 0.34, "aoDistance": 1.4, "aoStrength": 0.16, "rockStrength": 0.08, "valleyTintStrength": 0.0, "forest": "cinematic-albedo", "rock": "cool-granite", "elevationRamp": [[0.0, [0.010, 0.075, 0.060, 1]], [0.30, [0.018, 0.17, 0.080, 1]], [0.62, [0.055, 0.31, 0.135, 1]], [0.84, [0.15, 0.39, 0.18, 1]], [1.0, [0.30, 0.43, 0.26, 1]]], "rockShadow": [0.065, 0.095, 0.095, 1], "rockLight": [0.25, 0.30, 0.28, 1], "distanceTint": [0.42, 0.59, 0.63, 1], "distanceTintStrength": 0.14, "rockSlopeStart": 0.60, "rockSlopeFull": 0.80, "graniteJointScale": 7.5},
+  "pbr": {"rock": {}},
+  "vegetation": {"enabled": false, "geometryEnabled": false, "asset": ".work/models/pine_sapling_small_1k.blend", "assetCollection": "pine_sapling_small", "instanceCount": 4000, "density": 0.32, "maximumElevationFraction": 0.96, "maximumSlope": 0.90, "treeHeightMeters": 58, "source": "Poly Haven pine_sapling_small (CC0)"},
+  "atmosphere": {"aerialPerspective": 0.52, "aerialDensity": 0.0, "aerialColor": [0.42, 0.57, 0.66, 1], "valleyMist": 0.0, "cloudDensity": 0.0},
+  "lighting": {"time": "sunrise", "azimuthDegrees": 225, "elevationDegrees": 10, "warmth": 0.62, "sunEnergy": 2.2, "sunAngleDegrees": 4.0, "studioLights": false, "worldStrength": 0.48, "hdri": ".work/hdri/kloppenheim_06_puresky_1k.hdr", "hdriRotationDegrees": 210, "source": "Poly Haven kloppenheim_06_puresky (CC0)"},
+  "color": {"viewTransform": "AgX", "look": "Medium High Contrast", "exposure": 0.95},
+  "routes": {"heightMeters": 8, "widthMeters": 14, "emissionStrength": 0.85, "bloom": 0.03}
+}

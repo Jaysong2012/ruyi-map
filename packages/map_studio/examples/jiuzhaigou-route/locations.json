@@ -1,0 +1,11 @@
+{
+  "locations": [
+    {"id":"goukou","name":"沟口 · 景区入口","coordinates":[103.9136,33.2556],"kind":"entry"},
+    {"id":"shuzheng","name":"树正群海","coordinates":[103.9103,33.2786],"kind":"spot"},
+    {"id":"nuorilang","name":"诺日朗换乘站","coordinates":[103.9086,33.3050],"kind":"station"},
+    {"id":"wuhuahai","name":"五花海","coordinates":[103.8936,33.3594],"kind":"spot"},
+    {"id":"zhenzhutan","name":"珍珠滩","coordinates":[103.8985,33.3480],"kind":"spot"},
+    {"id":"changhai","name":"长海","coordinates":[103.9281,33.3836],"kind":"spot"},
+    {"id":"wucaichi","name":"五彩池","coordinates":[103.9242,33.3778],"kind":"exit"}
+  ]
+}

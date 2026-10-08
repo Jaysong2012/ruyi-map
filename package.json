@@ -1,0 +1,15 @@
+{
+  "name": "ruyi-map",
+  "version": "0.1.0",
+  "description": "视频级地图镜头生产线（node 侧：确定性逐帧渲染基建）",
+  "type": "module",
+  "private": true,
+  "license": "MIT",
+  "dependencies": {
+    "playwright-core": "^1.49.0"
+  },
+  "scripts": {
+    "setup": "npx playwright-core install chromium",
+    "test": "node --test tests/node/"
+  }
+}

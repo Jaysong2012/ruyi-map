@@ -1,0 +1,641 @@
+<!doctype html>
+<!-- Map Studio v2 通用 3D 路线渲染器：只消费 /compiled.json，不含任何景区名称、坐标或场景分支。
+     时间语义：window.__setT(t) 是纯函数——相同 t 必然得到相同画面，供逐帧确定性渲染。 -->
+<html><head><meta charset="utf-8"><link rel="stylesheet" href="/lib/maplibre-gl.css">
+<style>
+html,body,#map{margin:0;width:100%;height:100%;overflow:hidden;background:#0a1410}.maplibregl-ctrl{display:none}
+.ol{position:absolute;left:0;top:0}
+#map canvas{filter:saturate(1.04) contrast(1.03) brightness(.97)}
+#grade{position:absolute;inset:0;pointer-events:none;background:linear-gradient(180deg,rgba(4,8,10,.05),transparent 35%,rgba(3,6,8,.09));box-shadow:inset 0 0 120px rgba(0,0,0,.20)}
+#haze{position:absolute;inset:0;pointer-events:none}
+#title{position:absolute;left:54px;top:44px;color:#fff;font:700 42px/1.12 "PingFang SC",sans-serif;text-shadow:0 3px 18px #000;opacity:0}
+#title small{display:block;margin-top:10px;color:#d6e9df;font:500 22px/1.2 "PingFang SC",sans-serif;letter-spacing:2px}
+#legend{position:absolute;left:54px;bottom:44px;display:flex;gap:12px;opacity:0;font-family:"PingFang SC",sans-serif}
+.pill{font-size:18px;font-weight:650;color:#fff;background:rgba(3,13,12,.82);border:1px solid rgba(255,255,255,.14);border-radius:10px;padding:9px 14px;box-shadow:0 4px 18px rgba(0,0,0,.35);white-space:nowrap}
+.pill b{display:inline-block;width:22px;height:5px;border-radius:5px;margin-right:9px;vertical-align:middle}
+.tag{font-family:"PingFang SC",sans-serif;font-size:15px;font-weight:650;color:#fff;background:rgba(3,13,12,.82);border:1px solid rgba(255,255,255,.14);border-radius:10px;padding:9px 14px;box-shadow:0 4px 18px rgba(0,0,0,.35);white-space:nowrap;opacity:0;text-shadow:0 2px 8px #000}
+.tag.stay{border-color:#ff7d72;color:#fff0ec}.tag.entry{border-color:#66e2ad}.tag.exit{border-color:#61c7ff}
+.hiker-wrap{width:42px;height:56px;filter:drop-shadow(0 4px 6px rgba(0,0,0,.72))}.hiker{width:42px;height:56px;opacity:0;transform-origin:50% 100%}
+.pulse{position:relative;width:14px;height:14px;opacity:0;pointer-events:none}.pulse .core{position:absolute;inset:0;border-radius:50%;background:#fff7c7;border:2px solid #fff;box-shadow:0 0 24px 9px rgba(255,184,52,.95)}.pulse .ring{position:absolute;left:50%;top:50%;width:28px;height:28px;margin:-14px;border:4px solid #ffd166;border-radius:50%;box-shadow:0 0 18px 3px rgba(255,174,43,.72);opacity:0}
+.callout-marker{width:1px;height:1px}.callout{position:absolute;width:1px;height:1px;opacity:0;font-family:"PingFang SC",sans-serif;color:#fff}.callout .pin{position:absolute;left:-7px;top:-7px;width:14px;height:14px;border-radius:50%;background:#ffd56a;border:3px solid #fff;box-shadow:0 0 0 5px rgba(255,213,106,.25),0 2px 8px #000}.callout .lead{position:absolute;top:-2px;width:112px;height:4px;background:#ffd56a;box-shadow:0 1px 6px #000}.callout .lead:after{content:"";position:absolute;top:-7px;border-top:9px solid transparent;border-bottom:9px solid transparent}.callout .card{position:absolute;bottom:20px;width:218px;padding:10px 13px;border-radius:9px;background:rgba(3,13,12,.92);border:1px solid rgba(255,213,106,.72);box-shadow:0 5px 22px rgba(0,0,0,.48);font-size:14px;line-height:1.4}.callout .card b{display:block;color:#ffd56a;font-size:18px;margin-bottom:2px}.callout .card i{display:block;font-style:normal}.callout.left .lead{right:0}.callout.left .lead:after{right:-2px;border-left:11px solid #ffd56a}.callout.left .card{right:122px}.callout.right .lead{left:0}.callout.right .lead:after{left:-2px;border-right:11px solid #ffd56a}.callout.right .card{left:122px}
+#hud{position:absolute;right:46px;top:42px;min-width:340px;padding:20px 26px;border-radius:16px;color:#fff;background:rgba(3,13,12,.86);border:1px solid rgba(255,255,255,.18);font-family:"PingFang SC",sans-serif;opacity:0;box-shadow:0 5px 24px rgba(0,0,0,.4)}#hud b{display:block;font-size:42px}#hud span{display:block;margin-top:6px;color:#d6e9df;font-size:28px}
+#credit{position:absolute;right:18px;bottom:13px;color:rgba(255,255,255,.78);font:12px "PingFang SC",sans-serif;text-shadow:0 1px 4px #000}
+/* 信息面板层（EP7 2026-09-23 主人裁决：带时间点位不在地图上写字——金色箭头指向准确位置+景区外解读卡）*/
+.pv-card{position:absolute;box-sizing:border-box;padding:9px 14px;border-radius:12px;background:linear-gradient(150deg,rgba(7,26,24,.9),rgba(3,14,12,.82));border:1px solid rgba(255,214,122,.4);box-shadow:0 6px 22px rgba(0,0,0,.42);opacity:0;will-change:opacity,transform}
+.pv-t{display:flex;align-items:baseline;gap:8px;white-space:nowrap}
+.pv-tm{font:700 15px ui-monospace,monospace;color:#ffd56a;letter-spacing:.5px}
+.pv-nm{font:700 17px "PingFang SC",sans-serif;color:#fff;text-shadow:0 1px 6px #000}
+.pv-lk{margin-top:4px;font:500 11.5px/1.4 "PingFang SC",sans-serif;color:rgba(255,255,255,.8)}
+.pv-card.on{border-color:rgba(255,216,128,.95);background:linear-gradient(150deg,rgba(40,33,8,.94),rgba(8,22,17,.86));box-shadow:0 0 0 1px rgba(255,214,122,.35),0 0 30px rgba(255,180,60,.38),0 6px 22px rgba(0,0,0,.45)}
+</style></head><body>
+<div id="map"></div><div id="grade"></div><div id="haze"></div>
+<svg id="routes" style="position:absolute;inset:0;width:100%;height:100%;pointer-events:none"></svg>
+<div id="title"></div><div id="legend"></div><div id="hud"><b></b><span></span></div><div id="credit"></div>
+<script src="/lib/maplibre-gl.js"></script>
+<script>
+(async function(){
+const C=await(await fetch('/compiled.json')).json();
+const M=C.map,OUT=C.output,DUR=C.storyboard.durationSeconds,EVENTS=C.storyboard.events;
+const LOCS={};for(const l of C.locations)LOCS[l.id]=l;
+const SEGS={};for(const s of C.segments)SEGS[s.id]=s;
+// 氛围调色：URL 参数 > map.grade > 默认（黄山暗调电影感判例：sat 原色亮绿直出=「死图」观感的一半；黄山同管线内建 sat/con/bmin/bmax 调色）
+const Q=new URLSearchParams(location.search),qnum=(k,d)=>{const v=parseFloat(Q.get(k));return Number.isFinite(v)?v:d},qstr=(k,d)=>Q.get(k)||d;
+const G0=M.grade||{};
+const GRADE={sat:qnum('gsat',G0.sat??-.22),con:qnum('gcon',G0.con??.14),bmax:qnum('gmax',G0.bmax??.86),bmin:qnum('gmin',G0.bmin??0),vig:qnum('vig',G0.vig??.42),warm:qnum('warm',G0.warm??.5),hsx:qnum('hsx',G0.hsx??.5)};
+// 大气 veil（2026-09-16 杠杆A·setSky 判死后的正解）：hz=强度 0 关（默认）建议 .5-.8；hzc=霾色；逐帧由 pitch（地平可见度）+zoom（海拔）驱动，高 pitch 低空=顶部远距霾最重——纯函数随 camAt，无帧历史依赖
+const HAZE={k:qnum('hz',G0.hz??0),col:qstr('hzc',G0.hzc||'#d9e6f2')};
+const hexA=(hex,a)=>{const m=/^#(..)(..)(..)$/.exec(hex);return m?`rgba(${parseInt(m[1],16)},${parseInt(m[2],16)},${parseInt(m[3],16)},${a.toFixed(3)})`:hex};
+// 金色反向补偿（2026-09-16 修复 cfAlt 已知副作用）：hue-rotate 是 #map canvas 全局 CSS 滤镜，GL 烘焙金色（callout 标题/光圈/金点/徽章金边）会被带偏 +θ 成黄绿。
+// 正解=烘焙与设色时预先 -θ 反向补偿：文字/图标按 θ 三档（h0/中/h1）烘备变体、__setT 逐帧就近切换（θ 随 zoom 连续变，变体离散=跳变 ≤6° 目检无感）；
+// circle 层颜色（光圈/车头底座）setPaintProperty 逐帧精确补偿。goldfix=0 回退旧行为。DOM 层（HUD/图例/标题）不吃 canvas 滤镜，无需补偿。
+const GOLDFIX=qnum('goldfix',G0.goldFix??1);
+const hueRot=(hex,deg)=>{const m=/^#(..)(..)(..)$/.exec(hex);if(!m||!deg)return hex;let r=parseInt(m[1],16)/255,g=parseInt(m[2],16)/255,b=parseInt(m[3],16)/255;
+  const mx=Math.max(r,g,b),mn=Math.min(r,g,b);let h=0,s=0;const l=(mx+mn)/2;
+  if(mx!==mn){const d=mx-mn;s=l>.5?d/(2-mx-mn):d/(mx+mn);h=mx===r?((g-b)/d+(g<b?6:0)):mx===g?(b-r)/d+2:(r-g)/d+4;h*=60}
+  h=((h+deg)%360+360)%360;const c=(1-Math.abs(2*l-1))*s,x=c*(1-Math.abs((h/60)%2-1)),mm=l-c/2;let rr=0,gg=0,bb=0;
+  if(h<60){rr=c;gg=x}else if(h<120){rr=x;gg=c}else if(h<180){gg=c;bb=x}else if(h<240){gg=x;bb=c}else if(h<300){rr=x;bb=c}else{rr=c;bb=x}
+  const to=v=>Math.round((v+mm)*255).toString(16).padStart(2,'0');return'#'+to(rr)+to(gg)+to(bb)};
+// canvas 滤镜参数化（2026-09-16 青山绿水方向立项：旅游攻略地图贩卖向往=明亮通透青绿，黄山暗调非全局真理）；cf=CSS filter 串，默认保旧值；canvas 由 Map 构造生成，赋值必须在 map 创建后
+const CF=qstr('cf',G0.cf||'saturate(1.04) contrast(1.03) brightness(.97)');
+// 海拔自适应调色（2026-09-16 主人判例：高空荒凉山体全局染绿=假；谷底真植被染绿=还原夏天）：hue/sat 随 zoom 连续插值——高空看穿更厚大气色彩灰淡（真实航拍如此），低空近地饱和鲜活；cfalt=1 启用，逐帧纯函数零跳变
+const CFALT={on:qnum('cfalt',G0.cfAlt??0),h0:qnum('cfhue0',G0.cfhue0??6),h1:qnum('cfhue1',G0.cfhue1??18),s0:qnum('cfsat0',G0.cfsat0??1.18),s1:qnum('cfsat1',G0.cfsat1??1.5),z0:qnum('cfz0',G0.cfz0??11.2),z1:qnum('cfz1',G0.cfz1??12.8),con:qnum('cfcon',G0.cfcon??1.04),bri:qnum('cfbri',G0.cfbri??1.06)};
+// 金色补偿变体档（见 hexA 下 goldfix 注释）：CFALT 关=单档零行为变化
+const GOLDTH=CFALT.on&&GOLDFIX?[CFALT.h0,(CFALT.h0+CFALT.h1)/2,CFALT.h1]:[0];
+const goldVi=h=>GOLDTH.length<2?0:(h<=(GOLDTH[0]+GOLDTH[1])/2?0:h>=(GOLDTH[1]+GOLDTH[2])/2?2:1);
+{const g=document.querySelector('#grade');g.style.boxShadow=`inset 0 0 ${Math.round(100+GRADE.vig*260)}px rgba(0,0,0,${GRADE.vig})`;g.style.background=`linear-gradient(180deg,rgba(4,8,10,.10),transparent 35%,rgba(3,6,8,.14))`+(GRADE.warm>0?`,radial-gradient(640px 420px at 66% 28%,rgba(255,196,96,${(GRADE.warm*.20).toFixed(3)}),transparent 72%)`:'')} // 暗角+暖色光池（黄山金色光池观感）
+// 路线渲染路径：默认 MapLibre 原生线图层（geojson 弧长切片 setData 生长，地形绑定=定义上零漂移——SVG overlay 手算投影海拔插值 vs terrain mesh 错位，相机一动线在坡上滑=「漂移」判死×3）；routelayer=0 纯 SVG（锁机位项目）
+// 单管线铁律（2026-09-10 主人「没有什么双轨」判死）：一切贴地元素（线/icon/tag/卡/点亮/pulse）全在 GL 层由引擎投影+引擎遮挡剔除——对齐与同隐同现由引擎保证；DOM 只剩屏幕固定 HUD/标题/图例；双轨（GL 线+SVG 垫底）=两轨不一致=向观众直播飘
+const RLAY=qnum('routelayer',G0.routelayer??1); // 项目级走 map.grade.routelayer：0=纯 SVG（锁机位总览/信息图用它——原生线图层贴地会被山脊真实遮挡，高空俯瞰路线断成碎片判例；锁机位无相机运动=SVG 漂移判例不成立）；1=GL 单管线（跟拍默认）
+const pfix=qnum('pfix',-1);
+const godcam=qnum('godcam',0); // 调试探针：fitCam 俯视图（遮挡排查，用完即撤）
+const GLSYM=qnum('glsym',1); // GL 符号层（icon/tag/点亮/pulse 全贴地）；0=DOM 旧路径回退
+const ease=x=>x<=0?0:x>=1?1:x*x*(3-2*x),fade=(t,a,b)=>ease((t-a)/(b-a));
+const lengths=coords=>{const a=[0];for(let i=1;i<coords.length;i++){const lat=(coords[i][1]+coords[i-1][1])/2*Math.PI/180;a.push(a[i-1]+Math.hypot((coords[i][0]-coords[i-1][0])*111320*Math.cos(lat),(coords[i][1]-coords[i-1][1])*110574))}return a};
+const SEGLEN={},SEGM={};for(const s of C.segments){SEGLEN[s.id]=lengths(s.coordinates);SEGM[s.id]=SEGLEN[s.id].at(-1)}
+const pointAt=(coords,lens,p)=>{const d=Math.max(0,Math.min(1,p))*lens.at(-1);let i=1;while(i<lens.length&&lens[i]<d)i++;if(i>=lens.length)return coords.at(-1);const q=(d-lens[i-1])/(lens[i]-lens[i-1]||1);return[coords[i-1][0]+(coords[i][0]-coords[i-1][0])*q,coords[i-1][1]+(coords[i][1]-coords[i-1][1])*q]};
+const smoothPointAt=(coords,lens,p,r=.06)=>{const n=9;let x=0,y=0,w=0;for(let i=0;i<n;i++){const q=Math.max(0,Math.min(1,p+r*(i-(n-1)/2)/((n-1)/2))),weight=1-Math.abs(i-(n-1)/2)/(n/2),pt=pointAt(coords,lens,q);x+=pt[0]*weight;y+=pt[1]*weight;w+=weight}return[x/w,y/w]};
+const edgeOf=color=>{const m=/^#(..)(..)(..)$/.exec(color);if(!m)return'#06261a';const f=v=>Math.round(parseInt(v,16)*.16).toString(16).padStart(2,'0');return'#'+f(m[1])+f(m[2])+f(m[3])};
+
+// ---- 时间轴分期：route 事件为骨架，hold/summary/camera 覆盖其间 ----
+const routes=EVENTS.filter(e=>e.type==='route').sort((a,b)=>a.start-b.start);
+const holds=EVENTS.filter(e=>e.type==='hold');
+const summaries=EVENTS.filter(e=>e.type==='summary');
+const camEvents=EVENTS.filter(e=>e.type==='camera');
+const firstRoute=routes[0]||null,lastRoute=routes.at(-1)||null;
+const segOrder=routes.map(r=>r.segment);
+// litthr（EP7 2026-09-22 总揽/推进双模式）：只认真正在线上的标记（段由 location 坐标串成，线上点 d≈0）；默认 1e9=旧行为。beat 分镜只有一条 leg，跨沟景点会投影到 leg 上被误判「走过」——off=true 摘除走过判定，保持小字在场
+const LITTHR=qnum('litthr',1e9);
+const NOJ=qnum('noj',0); // noj=1 总揽模式（EP7 2026-09-22 主人定位裁决：总揽=纯静态计划图，无车无旅人，路线事件只画线不驱动任何走过判定）
+const litPts=EVENTS.filter(e=>e.type==='marker'&&LOCS[e.location]).map(e=>{const lc=LOCS[e.location].coordinates;let best=null; // 走过点亮（主人 2026-09-09）：journey 越过景点最近弧长位即永久点亮金点
+  for(const sid of segOrder){const s=SEGS[sid],lens=SEGLEN[sid];for(let i=0;i<s.coordinates.length;i++){const c=s.coordinates[i],d=(c[0]-lc[0])*(c[0]-lc[0])+(c[1]-lc[1])*(c[1]-lc[1]);if(!best||d<best.d)best={d,seg:sid,q:lens[i]/lens.at(-1)}}}
+  return best?{c:lc,seg:best.seg,q:best.q,off:best.d*111000*111000>LITTHR*LITTHR}:null}).filter(Boolean);
+const journeyAt=NOJ?()=>null:(t=>{ // 旅人位置：route 事件内沿弧长走，事件间隙停在上次终点；NOJ=1 总揽模式（无车无旅人）
+  for(const r of routes){if(t<r.start)break;const s=SEGS[r.segment],p=ease((t-r.start)/(r.end-r.start));if(t<=r.end)return{pos:pointAt(s.coordinates,SEGLEN[s.id],p),seg:r.segment,p,active:true};if(r===lastRoute||t<(routes[routes.indexOf(r)+1]||{start:1e9}).start)return{pos:s.coordinates.at(-1),seg:r.segment,p:1,active:false}}
+  return null});
+const stageAt=t=>{ // 当前相机分期
+  const su=summaries.find(e=>t>=e.start&&t<=e.end);if(su)return{kind:'summary',ev:su};
+  const ho=holds.find(e=>!e.camFollow&&t>=e.start&&t<=(e.end>e.start?e.end:DUR));if(ho)return{kind:'hold',ev:ho};
+  const ro=routes.find(e=>t>=e.start&&t<=e.end);if(ro)return{kind:'route',ev:ro};
+  const ce=camEvents.find(e=>t>=e.start&&t<=(e.end>e.start?e.end:DUR));if(ce)return{kind:'camera',ev:ce};
+  return{kind:'idle',ev:null}};
+
+// ---- 相机参数：分期闭式求值 + 跨界混合保证连续（不闪帧） ----
+const LATF=Math.cos(M.center[1]*Math.PI/180);
+const MAXNATIVEZ=15.2; // 卫星瓦片锁 z15 原生（serve.py 降采样供低级），超过即数字放大发虚
+const ALTK=1.5*OUT.height/512*40075016.686; // 相机海拔=ALTK/2^zoom（transform 实测拟合，随输出高度缩放）
+const zoomForAgl=(agl,g)=>Math.max(9.6,Math.min(MAXNATIVEZ,Math.log2(ALTK/(agl+g*TEX)))); // AGL 恒定驱动（视觉 AGL=对 TEX 放大后的地形）：elevation=0 语义下相机海拔=agl+g×TEX，不含 TEX 会把相机压进视觉山体 1.5 倍（t=26.7 贴山判例）
+const GPROF={};for(const s of C.segments){if(s.groundProfile)GPROF[s.id]=s.groundProfile}
+const groundAt=(segId,p,r=.08)=>{const g=GPROF[segId];if(!g)return null;const n=g.length;let acc=0,w=0; // 编译期地面剖面三角窗平滑（运行时 queryTerrainElevation 不可信判例）
+  for(let i=0;i<9;i++){const q=Math.max(0,Math.min(1,p+r*(i-4)/4)),weight=1-Math.abs(i-4)/4.5;const f=q*(n-1),i0=Math.floor(f),i1=Math.min(n-1,i0+1),fr=f-i0,v0=g[i0]??g[i1],v1=g[i1]??v0;if(v0==null)continue;acc+=(v0+(v1-v0)*fr)*weight;w+=weight}
+  return w>0?acc/w:null};
+const autoZoom=segId=>{const m=SEGM[segId]||2000;const z=Math.log2(156543.03392*LATF*OUT.height*.5/Math.max(m,60));return Math.max(9.6,Math.min(MAXNATIVEZ,z))}; // 回退用（无 agl/无 dem 项目）
+const bearingAt=(segId,p,r=.08)=>{const s=SEGS[segId],lens=SEGLEN[segId]; // 切线方位（0=北顺时针）：相机始终从路线后方看前方=bearing 固定被山体挤到背后挡视野判例（t=26.7 贴坡）
+  const a=pointAt(s.coordinates,lens,Math.max(0,p-r)),b=pointAt(s.coordinates,lens,Math.min(1,p+r));
+  const dLon=(b[0]-a[0])*111320*Math.cos((a[1]+b[1])/2*Math.PI/180),dLat=(b[1]-a[1])*110574;
+  return Math.atan2(dLon,dLat)*180/Math.PI};
+const lerpAngle=(a,b,q)=>{let d=b-a;while(d>180)d-=360;while(d<-180)d+=360;return a+d*q}; // bearing 混合走最短弧（179→-179 不绕 358°）
+const routeZoomSmooth=(segId,p)=>{const agl=(SEGS[segId]||{}).agl;const g=groundAt(segId,p,.35); // 大窗平滑（35% 弧长≈数 km）：只跟地面大趋势补偿 AGL，高频起伏留给自然透视；r=.08 小窗=zoom 高频波动呼吸感、段内常数=地面急降段上下涌（cable-down ±12% 判例），大窗是两头的正解
+  return agl&&g!=null?zoomForAgl(agl,g):autoZoom(segId)};
+const basePitch=M.pitch??52,baseBearing=M.bearing??0;
+const LOCKCAM=M.lockCamera?{center:M.lockCamera.center,zoom:M.lockCamera.zoom,pitch:M.lockCamera.pitch??basePitch,bearing:M.lockCamera.bearing??baseBearing}:null; // 上帝视角锁定机位（EP3 张家界主人判例：攻略地图忌晃动，信息层叠不运镜）
+let fitCam=null; // summary 目标机位，map load 后计算
+const drift=t=>[Math.sin(t*.21)*.0016,Math.cos(t*.17)*.0012];
+function rawCamFor(st,t){ // 单个分期的闭式求值；progress 已 clamp，公式可自然延伸过分期边界
+  if(LOCKCAM) return {...LOCKCAM,ground:M.ground??0}; // 锁定机位：任何事件分期相机恒定
+  if(st.kind==='summary'){if(st.ev.flyIn===false&&fitCam)return{...fitCam,ground:M.ground??0}; // 分段对比 summary 禁飞入（EP3 下集 abc B/C 段「山成了天」判例：flyIn 前半程=跟拍特写混合，分段 summary 要的是立刻全场）；27-34 总 summary 保留 flyIn 拉远揭示 */
+  const p=ease((t-st.ev.start)/((st.ev.end-st.ev.start)||1));const from=journeyAt(st.ev.start)?.pos||M.center;const to=fitCam||{center:M.center,zoom:M.zoom,pitch:Math.min(basePitch,46),bearing:baseBearing};
+  // summary 显式 pitch/zoom override（2026-09-20 EP7 九寨终态判例）：幕三=「一图」信息图语义，俯视 pitch≈33 让 draped 线少受山脊诚实遮挡（高空俯瞰+大 pitch=沟谷线断碎，routelayer 判例的场景半边）；3D 电影感留给幕一二
+  const to2=st.ev.pitch!=null||st.ev.zoom!=null?{...to,pitch:st.ev.pitch??to.pitch,zoom:st.ev.zoom??to.zoom}:to;
+  const z0=lastRoute?routeZoomSmooth(lastRoute.segment,1):M.zoom;const g0=lastRoute?(groundAt(lastRoute.segment,1,.35)??M.ground):(M.ground??0),g1=M.ground??g0;return{center:[from[0]+(to2.center[0]-from[0])*p,from[1]+(to2.center[1]-from[1])*p],zoom:z0+(to2.zoom-z0)*p,pitch:basePitch+(to2.pitch-basePitch)*p,bearing:baseBearing*(1-p)+to2.bearing*p,ground:g0+(g1-g0)*p}}
+  if(st.kind==='hold'){const loc=st.ev.location?LOCS[st.ev.location]:null;const j=journeyAt(t);const prev=[...routes].reverse().find(r=>r.end<=(st.ev.start??t)+.001);const pc=prev?(prev.camera||null):null;const g=loc&&loc.ground!=null?loc.ground:(prev?(groundAt(prev.segment,1,.35)??M.ground):M.ground);
+    const creep=qnum('creep',st.ev.creep??0); // 杠杆D·缓推（2026-09-16 真实感立项）：hold 期单调 zoom 缓推（zoom/秒，建议 .015-.03，8s≈拉近 12-21%）让地形视差活着；与「hold 禁 zoom 呼吸」判例的边界：呼吸=振荡判死，缓推=单向单调允许且默认关，样片裁决后才许进正片
+    if(pc&&pc.center)return{center:pc.center,zoom:(pc.zoom??(prev?routeZoomSmooth(prev.segment,1):M.zoom))+creep*(t-st.ev.start),pitch:pc.pitch??basePitch,bearing:pc.bearing??baseBearing,ground:g}; // 段机位策略：route 显式 camera 时 hold 同机位（黄山判例：段内机位锁死，动的是内容不是相机）
+    const c0=loc?loc.coordinates:(j?j.pos:M.center); // 高海拔到达拍取景补偿（2026-09-10 山顶环线出屏判例）：elevation 冻结语义 look-at 平面=海拔0，景点地面视觉高 ele=ground×TEX 把实景抬到视轴上方=推近时目标出屏——center 沿 bearing 前移 Δ=ele·tan(pitch)（相机刚体平移模型：视轴在景点水平位的高度=H·Δ/L=ele 恰好穿过实景点；首版 ele·L/(H-ele) 误用相机固定模型=双倍过补偿出屏判例）；Δ 钳 ≤1.2L 防爆
+    let c=c0;
+    if(loc&&loc.ground!=null&&st.ev.agl){const p2=(st.ev.pitch??basePitch)*Math.PI/180,D=st.ev.agl+loc.ground*TEX,L=D*Math.sin(p2),ele=loc.ground*TEX;
+      const dl=Math.min(ele*Math.tan(p2),1.2*L),br=(st.ev.bearing??baseBearing)*Math.PI/180,cl=Math.cos(c0[1]*Math.PI/180);
+      c=[c0[0]+Math.sin(br)*dl/(111320*cl),c0[1]+Math.cos(br)*dl/110574]}
+    return{center:c,zoom:(st.ev.agl?zoomForAgl(st.ev.agl,g??M.ground??0):(prev?routeZoomSmooth(prev.segment,1):M.zoom))+creep*(t-st.ev.start),pitch:st.ev.pitch??basePitch,bearing:st.ev.bearing??baseBearing,ground:g}} // 视角平稳判例：hold 期禁 bearing 摆动/zoom 呼吸；zoom=前段末端 AGL 值零跳变（hold 可显式 agl/pitch/bearing 推近景点=到达解读拍；bearing 显式值=避免默认 baseBearing 与跟拍末端切向差出 78°/1.6s=54°/s 甩鞭判例——hold 方位角应贴近跟拍末端切向）；prev 判定锚定 hold 自身 start（用求值 t 会在边界混合窗口左半丢失 prev→幻影 zoom 单帧跳变判例）
+  if(st.kind==='route'){const s=SEGS[st.ev.segment],p=ease(Math.max(0,Math.min(1,(t-st.ev.start)/(st.ev.end-st.ev.start))));const cam=st.ev.camera||{};
+    if(cam.follow){ // 黄山式跟拍（主人 2026-09-09 钦定：黄山=跟拍视角 3D 实景路线动画）：相机沿路线切线方位跟路线头飞行，bearing 随弯道平滑转动；高空固定方位角缓推看线画=「死图上画路线」判死，上任「黄山非跟拍」系误读
+      const tw=qnum('ftw',cam.tangentWin??.12),fpitch=qnum('fpitch',cam.pitch??62),fagl=qnum('fagl',cam.agl||0);
+      const tr=qnum('ftrail',cam.trail??cam.lookAhead??.06),la=qnum('fla',0); // trail=相机拖在路线头后方（黄山式：段首起点城市留画面=「从城里出发」读感；v2 前探 la=段首相机已在山里、起点出画=「从山里出发」判死）
+      const cp=Math.max(-.12,Math.min(1,p+la-tr));
+      let center,er=.06;
+      if(cp>=0){center=smoothPointAt(s.coordinates,SEGLEN[s.id],cp);
+        if(cp<er){const pt=pointAt(s.coordinates,SEGLEN[s.id],cp),q=ease(cp/er);center=[pt[0]+(center[0]-pt[0])*q,pt[1]+(center[1]-pt[1])*q]}
+        else if(cp>1-er){const pt=pointAt(s.coordinates,SEGLEN[s.id],cp),q=ease((cp-(1-er))/er);center=[center[0]+(pt[0]-center[0])*q,center[1]+(pt[1]-center[1])*q]}}
+      else{ // 段首站定：起点沿初切线后撤（镜头悬在城市上空看车开出，p→trail 时连续收回到跟随位）
+        const br0=bearingAt(st.ev.segment,0,.1)*Math.PI/180,st0=s.coordinates[0],back=-cp*SEGM[s.id];
+        center=[st0[0]-Math.sin(br0)*back/(111320*LATF),st0[1]-Math.cos(br0)*back/110574]}
+      const g0=groundAt(st.ev.segment,p,.35)??M.ground??0;
+      return{center,zoom:fagl?zoomForAgl(fagl,g0):routeZoomSmooth(st.ev.segment,p),pitch:fpitch,bearing:bearingAt(st.ev.segment,Math.max(0,p-tr*.5),tw),ground:g0}}
+    if(cam.from&&cam.to){const cp=p,fp=cam.from,tp=cam.to; // 匀速缓推机位（黄山判例：相机沿行程方向极缓单向推进=活的但不晃；不跟车不锁死）
+      return{center:[fp.center[0]+(tp.center[0]-fp.center[0])*cp,fp.center[1]+(tp.center[1]-fp.center[1])*cp],
+        zoom:(fp.zoom??tp.zoom)+( (tp.zoom??fp.zoom)-(fp.zoom??tp.zoom))*cp,
+        pitch:(fp.pitch??basePitch)+((tp.pitch??fp.pitch??basePitch)-(fp.pitch??basePitch))*cp,
+        bearing:(fp.bearing??baseBearing)+((tp.bearing??fp.bearing??baseBearing)-(fp.bearing??baseBearing))*cp,
+        ground:groundAt(st.ev.segment,p,.35)??M.ground??0}}
+  let center=cam.center;
+    if(!center){const sm=smoothPointAt(s.coordinates,SEGLEN[s.id],p),r=.06; // 端部收敛：平滑窗均值在端点滞后/超前 ~r/2 弧长，边界混合把它瞬间拽向真值=急冲急停判例；端部 r 区间内向 pointAt 连续收敛
+      if(p>1-r||p<r){const pt=pointAt(s.coordinates,SEGLEN[s.id],p),q=p>1-r?ease((p-(1-r))/r):ease(p/r);
+        center=p>1-r?[sm[0]+(pt[0]-sm[0])*q,sm[1]+(pt[1]-sm[1])*q]:[pt[0]+(sm[0]-pt[0])*q,pt[1]+(sm[1]-pt[1])*q]}
+      else center=sm}
+    return{center,zoom:cam.zoom??routeZoomSmooth(st.ev.segment,p),pitch:cam.pitch??basePitch,bearing:cam.bearing??baseBearing,ground:groundAt(st.ev.segment,p,.35)??M.ground??0}}
+  if(st.kind==='camera'){const cam=st.ev.camera||{};if(cam.to){const p=ease(Math.max(0,Math.min(1,(t-st.ev.start)/((st.ev.end-st.ev.start)||1))));const from={...(cam.from||{center:M.center,zoom:M.zoom,pitch:basePitch,bearing:baseBearing}),ground:cam.from&&cam.from.ground!=null?cam.from.ground:M.ground??0},to={...cam.to,ground:cam.to.ground!=null?cam.to.ground:M.ground??0};if(cam.centerPow){const pc=Math.pow(p,cam.centerPow),m=mixCam(from,to,p);m.center=[from.center[0]+(to.center[0]-from.center[0])*pc,from.center[1]+(to.center[1]-from.center[1])*pc];return m}return mixCam(from,to,p)}return{center:cam.center||M.center,zoom:cam.zoom??M.zoom,pitch:cam.pitch??basePitch,bearing:cam.bearing??baseBearing,ground:M.ground??0}} // idle 禁 drift 漂移
+  const j=journeyAt(t);const started=t>(firstRoute?.start??1e9);const c=j&&started?j.pos:M.center;const g=j&&started?(groundAt(j.seg,1,.35)??M.ground):M.ground;return{center:c,zoom:j&&started?autoZoom(j.seg):M.zoom,pitch:basePitch,bearing:baseBearing,ground:g??0}}
+const BOUNDARIES=[...routes,...holds,...summaries,...camEvents].filter(e=>e.start>0).map(e=>({t:e.start,bw:e.blendSec??.45})).sort((a,b)=>a.t-b.t);
+const mixCam=(A,B,q)=>({center:[A.center[0]+(B.center[0]-A.center[0])*q,A.center[1]+(B.center[1]-A.center[1])*q],zoom:A.zoom+(B.zoom-A.zoom)*q,pitch:A.pitch+(B.pitch-A.pitch)*q,bearing:lerpAngle(A.bearing,B.bearing,q),_breathe:(A._breathe||0)+((B._breathe||0)-(A._breathe||0))*q,ground:(A.ground||0)+((B.ground||0)-(A.ground||0))*q});
+function camAt(t){if(godcam&&fitCam)return{...fitCam,ground:M.ground??0};for(const b of BOUNDARIES){if(Math.abs(t-b.t)<b.bw){const q=ease((t-(b.t-b.bw))/(2*b.bw));return mixCam(rawCamFor(stageAt(b.t-.001),t),rawCamFor(stageAt(b.t+.001),t),q)}}return rawCamFor(stageAt(t),t)}
+
+// ---- 视线净空同步（2026-09-10 t=8 探针五连判例）----
+// ① maplibre v4.7.1 symbol 层【不吃】地形遮挡：原生线=draped 贴纸被脊诚实遮挡时，icon 仍浮在脊面=「车飘」本体；
+// ② queryRenderedFeatures 对 symbol 层返回空不可信（t=13.2 肉眼可见 icon 时 qr 仍=空）——遮挡判定只许几何射线，禁止渲染查询；
+// ③ 相机位置闭式反演：视线轴距离 D=ALTK/2^zoom（elevation 冻结语义，look-at 平面=海拔 0），相机高度=D×cos(pitch)、水平后移=D×sin(pitch) 沿 bearing 反向——上任「center 正上方」与 tan(pitch) 两种误用都已判死（transform.cameraToCenterDistance 实证）；
+// ④ 射线地形采样必须走 queryTerrainElevation（与渲染 mesh 同 tile 缓存=引擎遮挡真值同源）——注意 v4.7.1 的 qte 返回【已乘 TEX 的视觉海拔】（逐顶点烘焙 570 vs qte 850 实证=×1.5；旧「1/TEX 缩放」判例是错的），射线比较禁止再乘 TEX（双乘=全程过杀判例）；demGrid maxpool 格内 MAX 在石柱林把邻峰算进本格=过杀（t=13.2 判例）；qte null 样本跳过（冷缓存宁显勿隐）；
+// ⑤ 净空同步只约束【贴地动体】（车 icon/点亮金点）——tag/解读卡是信息陈设，锚点常贴崖壁（百龙下站 570m 锚 vs 身后 874m 崖=射线擦崖误杀，hold 解读拍卡消失判例），且主人要的是位置不飘（GL 投影已保证）不是信息隐现；pulse 光圈同理解禁；
+// ⑥ qte null 样本跳过+覆盖率闸门（<40% 判「未知→可见」）：冷缓存时网格回退会过杀致 icon 在 --at 预览整帧消失（hold 帧 trav=0 判例）；渲染序列缓存逐帧 warm 自校正，--at 靠二次 setT 热缓存收敛——宁显勿隐。
+const qteH=(lng,lat)=>{try{const e=map.queryTerrainElevation([lng,lat]);return Number.isFinite(e)?e:null}catch(_){return null}};
+const rayBlocked=(cam,lng,lat,altE)=>{ // cam=camAt 输出；altE=锚点世界海拔（地面米×TEX）
+  const D=ALTK/Math.pow(2,cam.zoom),pr=(cam.pitch||0)*Math.PI/180,br=(cam.bearing||0)*Math.PI/180; // D=视线轴距离（cameraToCenterDistance 同体系）：水平=D×sin(pitch)，高度=D×cos(pitch)——tan 误用会把相机算高 2 倍远 2 倍=全程误判可见（t=8 visMul=1 判例）
+  const altC=D*Math.cos(pr),off=D*Math.sin(pr),cl=Math.cos(cam.center[1]*Math.PI/180);
+  const cx=cam.center[0]-Math.sin(br)*off/(111320*cl),cy=cam.center[1]-Math.cos(br)*off/110574;
+  // 朝向判定已废弃（f158 判例：±30m qte 梯度抓到小土丘法向=-0.19 背向，但引擎同帧线头清晰可见=误杀，traveller 整帧消失=「车闪」本体；
+  // heightfield 背坡大多已被射线遮挡覆盖，残余「背坡点可见」窗口由引擎自身 symbol 深度剔除兜底——circle 底座 draped 通道与线同渲染，不需要也无法误判）
+  const N=48;
+  for(let i=2;i<N-4;i++){const s=i/N,lx=cx+(lng-cx)*s,ly=cy+(lat-cy)*s; // 端点格跳过：锚点邻峰不参判；qte null 样本跳过（冷缓存宁显勿隐，判例⑥）
+    const h=qteH(lx,ly);if(h==null)continue;
+    if(h>altC+(altE+12-altC)*s+25)return true} // qte 已是 TEX 视觉海拔（判例④：禁再乘）；altE 同为视觉海拔（调用方 raw×TEX）；25m 余量=ALTK 拟合+mesh LOD 差
+  return false};
+const visMul=(lng,lat,ground,t)=>{ // 0.8s 六时点交叉淡（采样全为 t 的纯函数；闪烁军规：净空 verdict 翻摆只允许表现为 alpha 涟漪，不许整帧隐现——f158 判例）
+  const altE=(ground||0)*TEX;let v=0;for(let k=0;k<6;k++)v+=rayBlocked(camAt(Math.max(0,t-k*.16)),lng,lat,altE)?0:1;return v/6};
+
+// ---- 地图与图层 ----
+const src=M.sources||{};
+// 太阳有时刻（2026-09-16 真实感五杠杆立项）：sunaz=hillshade 光照方位（规格默认 335=西北），sunanchor=map 时太阳钉在地球上（跟拍过弯光线不随相机转=真实；默认 viewport 保旧行为）；v4.7.1 无 altitude 属性，低角度长影用 hsx+warm 联合伪造
+const SUNAZ=qnum('sunaz',G0.sunAz??335),SUNANCHOR=qstr('sunanchor',G0.sunAnchor||'viewport');
+const style={version:8,sources:{sat:{type:'raster',tiles:[src.satellite.tiles.startsWith('http')?src.satellite.tiles:'/'+src.satellite.tiles],tileSize:256,minzoom:0,maxzoom:src.satellite.maxzoom??12},dem:{type:'raster-dem',tiles:[src.dem.tiles.startsWith('http')?src.dem.tiles:'/'+src.dem.tiles],tileSize:256,minzoom:0,maxzoom:Math.min(src.dem.maxzoom??12,13),encoding:src.dem.encoding||'terrarium'}},layers:[{id:'bg',type:'background',paint:{'background-color':qnum('skygrad',0)?'rgba(10,20,16,0)':'#0a1410'}},{id:'sat',type:'raster',source:'sat',paint:{'raster-fade-duration':0,'raster-saturation':GRADE.sat,'raster-contrast':GRADE.con,'raster-brightness-min':GRADE.bmin,'raster-brightness-max':GRADE.bmax}},{id:'shade',type:'hillshade',source:'dem',paint:{'hillshade-exaggeration':GRADE.hsx,'hillshade-shadow-color':'rgba(15,20,26,.5)','hillshade-highlight-color':'rgba(255,244,220,.26)','hillshade-illumination-direction':SUNAZ,'hillshade-illumination-anchor':SUNANCHOR}}]}; // Google 地球真实感判例：sat 原色+中性灰蓝 hillshade，去绿色 tint（暗绿沙盘风≠真实感）；dem 锁 z13=7.6m/px（z11 30m/px 对石柱林采样不足→mesh 顶点插值轮廓摇摆+hillshade 闪烁=动起来晃判例）；2026-09-09 起默认暗调（GRADE）+暖高光=黄山电影感方向；skygrad=1 时 bg 透明=#map CSS 大气渐变透出（EP6 川西 v2 天空；setSky 无效判例后 DOM 正解）
+if(qnum('skygrad',0))document.querySelector('#map').style.background='linear-gradient(180deg,#16283d 0%,#3d5a78 38%,#8aa5bc 68%,#dfe8ee 92%,#eef3f6 100%)';
+const map=new maplibregl.Map({container:'map',interactive:false,attributionControl:false,fadeDuration:0,maxTileCacheSize:2000,style,center:M.center,zoom:M.zoom,pitch:basePitch,bearing:baseBearing,maxPitch:70});
+map.on('load',async()=>{
+  document.querySelector('#map canvas').style.filter=CF;
+  map.setTerrain({source:'dem',exaggeration:TEX});
+  // 大气判例（2026-09-16 红色探针实证）：v4.7.1 setSky/atmosphere 在 mercator+terrain 下完全无渲染效果（全红 fog 帧与对照帧像素一致）——大气衰减改走 #haze DOM 渐变 veil（见 __setT）；真雾效=MapLibre v5 globe 专属，升级需独立验证（v4.7.1 symbol 遮挡判例在身）
+  map._elevationFreeze=true;map.transform.elevation=0; // 冻结贴地动画：render 循环默认每帧把 transform.elevation 设为中心点地形海拔×exaggeration（读 dem 运行时状态+动画渐近），相机矩阵被注入帧历史依赖=overlay 位置两态判例；冻结后 zoom 语义=绝对海拔，与 AGL 公式同体系
+  // 3D 楼宇层（可选能力，2026-09-13 城市片立项）：map.sources.buildings=geojson 路径（Feature 带 properties.h 米）。
+  // 城市平地无地形高差，立体感唯一正解=楼宇拉伸（卫星图无侧面纹理）；vertical-gradient=侧立面明暗。
+  // zoom 淡入淡出：拉远总览（summary/建立镜头）楼宇消失防噪防性能税；路线遮挡实测：pitch≥55+默认层高≤15m 时遮挡带<10m 可忽略。
+  // 地标识别（2026-09-16 城市升级立项）：Feature 带 properties.lm=地标名 → 颜色换亮金一档（lmc 可扫参）+高度乘 lmhx——
+  // 地标不能和普通楼长一样（城市识别度本体）；名牌用 storyboard marker(leader:true) 复用既有引线机制，引擎不重复造标签。
+  // 楼宇真实感（2026-09-16 主人「高楼不真实」判词）：均质灰盒子=假的本体——色域收窄到屋顶色系（米白→暖灰，bcol0-3 扫参）、
+  // opacity 降到 .72 让卫星屋顶微透出、bhx<1 压 OSM 普遍高估的楼高；地标才用真实高度立起来。
+  if(src.buildings){
+    const BS2=(M.buildingStyle)||{};
+    map.addSource('bldg',{type:'geojson',data:src.buildings.startsWith('http')?src.buildings:'/'+src.buildings});
+    map.addLayer({id:'bldg',type:'fill-extrusion',source:'bldg',minzoom:13.2,paint:{
+      'fill-extrusion-color':['case',['has','lm'],qstr('lmc',BS2.landmarkColor||'#f2e3c2'),Q.get('bcol')?qstr('bcol','#d8d3c8'):['interpolate',['linear'],['get','h'],6,qstr('bcol0',BS2.color0||'#e7e0d3'),18,qstr('bcol1',BS2.color1||'#d8d3c8'),50,qstr('bcol2',BS2.color2||'#c2bcb1'),120,qstr('bcol3',BS2.color3||'#a8a39c')]],
+      'fill-extrusion-height':['*',['get','h'],qnum('bhx',BS2.heightX??1),['case',['has','lm'],qnum('lmhx',BS2.landmarkHeightX??1),1]],
+      'fill-extrusion-base':0,
+      'fill-extrusion-opacity':['interpolate',['linear'],['zoom'],13.2,0,14.0,qnum('bop',BS2.opacity??0.82)],
+      'fill-extrusion-vertical-gradient':true}});
+  }
+  // 水面层（可选能力；v2 定调 2026-09-16 主人判词：浅蓝白镜面满铺=牛奶假水判死）。
+  // 判死线边界不变：禁流动/波纹/流体关键帧。视觉主导色=水体本身青绿（高空俯瞰城市湖泊的真相），
+  // 天空镜面反射只是局部高光不是底色——正解=「染色不覆盖」：深青绿低透明染色让卫星水纹透出，sheen 默认 0；
+  // inner 环（湖心岛/江心洲）必须在 fetch 侧挖孔，否则水色盖岛盖路（主人判词本体）。wcol/wop/wsh 扫参；wtr=0 整层关闭（对照用）。
+  if(src.water&&qnum('wtr',1)){
+    const WS=(C.map&&C.map.waterStyle)||{};
+    map.addSource('wtr',{type:'geojson',data:src.water.startsWith('http')?src.water:'/'+src.water});
+    map.addLayer({id:'wtr-fill',type:'fill',source:'wtr',paint:{
+      'fill-color':qstr('wcol',WS.color||'#3d6b66'),
+      // 高度衰减（2026-09-16 主人判词：长江高空强染色=塑料带判死）：高空近原色（江河泥沙色本就黄绿，卫星什么样就什么样），
+      // 染色集中在低空近景（湖面特写提亮出青绿）——与 cfAlt「高空看穿更厚大气色彩灰淡」同一物理依据
+      'fill-opacity':['interpolate',['linear'],['zoom'],9,qnum('wop',WS.opacity??.3)*.1,12,qnum('wop',WS.opacity??.3)*.45,14,qnum('wop',WS.opacity??.3)]}});
+    if(qnum('wsh',WS.sheen??0)>0)map.addLayer({id:'wtr-sheen',type:'fill',source:'wtr',paint:{
+      'fill-color':'#ffffff',
+      'fill-opacity':['interpolate',['linear'],['zoom'],11,qnum('wsh',WS.sheen??0),14,qnum('wsh',WS.sheen??0)*.45]}});
+    // 白岸线（EP7 九寨 2D 判例：海子是灵魂卖点，fill 在青绿底上「对比不足/被线遮挡」两轮判词——白描边勾出湖形=宝石镶嵌观感，opacity 随 fill 同曲线）
+    if(WS.outline>0)map.addLayer({id:'wtr-line',type:'line',source:'wtr',paint:{
+      'line-color':'#ffffff',
+      'line-width':WS.outline,
+      'line-opacity':['interpolate',['linear'],['zoom'],9,.4,12,.85,14,.7]}});
+  }
+  // 行政边界层（可选能力，2026-09-16 EP5 中国→张家界聚焦立项）：map.sources.boundary=geojson 路径。
+  // 定位器语法：全国视角框出目标市域，随俯冲长大=「推进时目标在哪」的空间锚；zoom 淡出（默认 10.2→10.8）防干扰景区级画面。
+  if(src.boundary){
+    const BS=(C.map&&C.map.boundaryStyle)||{};
+    const fz=BS.fadeZoom||[10.2,10.8];
+    map.addSource('bnd',{type:'geojson',data:src.boundary.startsWith('http')?src.boundary:'/'+src.boundary});
+    map.addLayer({id:'bnd-fill',type:'fill',source:'bnd',paint:{
+      'fill-color':BS.color||'#e8c35a',
+      'fill-opacity':['interpolate',['linear'],['zoom'],4,BS.fill??0.10,fz[0],(BS.fill??0.10)*0.6,fz[1],0]}});
+    map.addLayer({id:'bnd-line',type:'line',source:'bnd',paint:{
+      'line-color':BS.color||'#e8c35a',
+      'line-width':['interpolate',['linear'],['zoom'],4,1.6,9,2.6,11,3.2],
+      'line-opacity':['interpolate',['linear'],['zoom'],fz[0],BS.opacity??0.9,fz[1],0]}});
+  }
+  // 行政边界第二层（可选能力，2026-09-20 EP7 九寨「四川省推近框出景区」主人判词立项）：map.sources.boundary2=geojson。
+  // 省/县接力语法：推近幕省界（boundary）先声夺人，z~7.5 县界（boundary2）接棒「框出目标」，景区级（z~10）县界退场防抢 Y 字全貌的戏。
+  // fadeZoomIn=[低隐,高显]（低 zoom 不出现——省级画面不被小界线切碎），fadeZoomOut=[高显,高隐]。
+  if(src.boundary2){
+    const BS2=(C.map&&C.map.boundaryStyle2)||{};
+    const fi=BS2.fadeZoomIn||[7.2,8.2],fo=BS2.fadeZoomOut||[9.6,10.3],b2=BS2.fill??0.12;
+    map.addSource('bnd2',{type:'geojson',data:src.boundary2.startsWith('http')?src.boundary2:'/'+src.boundary2});
+    map.addLayer({id:'bnd2-fill',type:'fill',source:'bnd2',paint:{
+      'fill-color':BS2.color||'#ffd97a',
+      'fill-opacity':['interpolate',['linear'],['zoom'],fi[0],0,fi[1],b2,fo[0],b2*.6,fo[1],0]}});
+    map.addLayer({id:'bnd2-line',type:'line',source:'bnd2',paint:{
+      'line-color':BS2.color||'#ffd97a',
+      'line-width':['interpolate',['linear'],['zoom'],7,2.4,9,4.5,11,4.0],
+      'line-opacity':['interpolate',['linear'],['zoom'],fi[0],0,fi[1],BS2.opacity??0.95,fo[0],BS2.opacity??0.95,fo[1],0]}});
+  }
+  // 路线=MapLibre 原生线图层（黄山式地形绑定：随地形投影，定义上零漂移）；生长=弧长切片 setData（lineMetrics 的 line-progress 与地理弧长非线性错配→生长头与 journey 错位判例；切片=生长头与车 icon 同一度量同源）；setData 竞态=__setT 同步翻 __IDLE=false+idle 事件双闸（dive3d 旧 true 残留判例）
+  if(RLAY)for(const s of C.segments){
+    map.addSource('rt-'+s.id,{type:'geojson',lineMetrics:true,data:{type:'FeatureCollection',features:[]}});
+    map.addSource('rth-'+s.id,{type:'geojson',data:{type:'FeatureCollection',features:[]}});
+    const lay=(id,src,w,col,dash)=>({id,type:'line',source:src,layout:{'line-cap':'round','line-join':'round'},paint:{'line-width':w,'line-color':col,'line-opacity':0,...(dash?{'line-dasharray':dash===true?[2.5,2]:dash}:{})}}); // dash:true(compiler 虚线语义)=默认[2.5,2]——布尔直传=addLayer 抛错图层缺失判例(2026-09-12)
+    if(s.style.glow)map.addLayer({id:'rt-e-'+s.id,type:'line',source:'rt-'+s.id,layout:{'line-cap':'round','line-join':'round'},paint:{'line-width':(s.style.width||5)*2.4,'line-color':s.style.color,'line-blur':6,'line-opacity':0}}); // 光晕打底（2026-09-16 金陵 hero 立项：暗调场景金线要发光，dark edge 是亮底描边语义不适用）；alpha 同主线×0.6
+    else map.addLayer(lay('rt-e-'+s.id,'rt-'+s.id,13,edgeOf(s.style.color)));
+    if(s.style.gradient&&GPROF[s.id]){ // 海拔变色线（EP6 川西 v2「路线颜色=海拔表」：橙家族明度梯度，500m 亮橙→4700m 雪线白；判例兼容：hue 保持橙系不违「保路线橙」）
+      const ac=h=>{const t=Math.max(0,Math.min(1,(h-400)/4300)),c0=[255,112,77],c1=[255,244,230];return `rgb(${c0.map((v,i)=>Math.round(v+(c1[i]-v)*t)).join(',')})`};
+      const n=24,st=[];for(let i=0;i<=n;i++){const p=i/n,g=groundAt(s.id,p);st.push(p,ac(g??500));}
+      map.addLayer({id:'rt-l-'+s.id,type:'line',source:'rt-'+s.id,layout:{'line-cap':'round','line-join':'round'},paint:{'line-width':s.style.width||7,'line-opacity':0,'line-gradient':['interpolate',['linear'],['line-progress'],...st]}});
+    }else map.addLayer(lay('rt-l-'+s.id,'rt-'+s.id,s.style.dash?(s.style.width||4):7,s.style.color,s.style.dash)); // 距离线语义：style.dash=[2.5,2]=细虚线（S0 三角总览判例：粗实线=行车动线，虚线=尺度参照，视觉语义必须分家）
+    map.addLayer(lay('rt-h-'+s.id,'rth-'+s.id,3,'#ffffff'));
+  }
+  // ---- GL 符号层（2026-09-09 主人铁律：icon/景点标记必须与真实路线同管线贴地——DOM/SVG 双轨=向观众直播「飘」判死）----
+  // 一切贴地元素在 GL 层由引擎投影（icon/tag/callout/lit/pulse），DOM 只剩屏幕固定 HUD/标题/图例
+  if(GLSYM){
+    const svgImg=async(name,svg,w,h)=>{const im=new Image();im.src='data:image/svg+xml;utf8,'+encodeURIComponent(svg.replace('<svg ','<svg xmlns="http://www.w3.org/2000/svg" width="'+w+'" height="'+h+'" '));await im.decode();map.addImage(name,im)};
+    await Promise.all(GOLDTH.flatMap((th,vi)=>{const rep=s=>s.replaceAll('#ffb648',hueRot('#ffb648',-th)).replaceAll('#ffcf65',hueRot('#ffcf65',-th)); // 徽章金边反向补偿变体（goldfix）
+      return[svgImg('ic-walk-v'+vi,rep(ICONS.walk),92,120),svgImg('ic-bus-v'+vi,rep(ICONS.bus),92,120),svgImg('ic-cable-v'+vi,rep(ICONS.cable),92,120)]}));
+    const txtImg=(draw,w,h)=>{const cv=document.createElement('canvas');cv.width=w*2;cv.height=h*2;const cx=cv.getContext('2d');cx.scale(2,2);draw(cx,w,h);return cx.getImageData(0,0,w*2,h*2)}; // addImage 收 ImageData（canvas 本体=mismatched image size 判例）
+    // 引线绘制（2026-09-12 S7 遗留需求落地）：标签底边→锚点的垂直接线+端点钉，烘焙进符号图=GL 投影锁死不飘
+    const drawLead=(cx,W,H,LD,col)=>{cx.lineCap='round';
+      cx.lineWidth=9;cx.strokeStyle='rgba(2,10,9,.88)';cx.beginPath();cx.moveTo(W/2,H-4);cx.lineTo(W/2,H+LD-12);cx.stroke();
+      cx.lineWidth=4;cx.strokeStyle=col;cx.beginPath();cx.moveTo(W/2,H-4);cx.lineTo(W/2,H+LD-12);cx.stroke();
+      cx.beginPath();cx.arc(W/2,H+LD-8,7,0,7);cx.fillStyle=col;cx.fill();cx.lineWidth=3;cx.strokeStyle='#fff';cx.stroke()};
+    // 景点 tag（2026-09-10 解读层 v2 主人判词：放大 3 倍+彩色+打字机+无背景框）——逐字阶段烘焙（全宽画布左对齐=逐字右长零抖动），深色描边替背景框
+    // 2026-09-22 EP7 主人终判词 v3「初始字一半大小纯黑无引线；走到才光圈箭头放大；走过再消失」：s1=14px 纯黑无引线常态；s2=62px 金大字带引线（走到窗口内）；走过隐藏（走过痕迹=lit 金点）
+    const KIND_COL={stay:'#ff7d72',exit:'#61c7ff',entry:'#66e2ad'};
+    const tagImgs={};
+    EVENTS.filter(e=>e.type==='marker'&&LOCS[e.location]).forEach((e,i)=>{const loc=LOCS[e.location],t=e.title!==undefined?e.title:(loc.name||''),col=KIND_COL[e.kind||loc.kind]||'#ffd56a';
+      if(!t){ // 文字外置判例（EP7 2026-09-23 主人裁决：带时间点位不在地图上写字）：空 title=无字锚——只留 litPts/光圈驱动位，烘焙 1px 透明图占位
+        tagImgs[i]={ev:e,loc,W:1,H:1,n:1};
+        for(const ST of [1,2]){GOLDTH.forEach((th,vi)=>{const nm='tag-'+i+'-1v'+vi+'s'+ST;const im=txtImg(()=>{},1,1);map.addImage(nm,im);tagImgs[i]['img1v'+vi+'s'+ST]=nm})}
+        return}
+      const chars=Array.from(t);
+      const grow=e.litMode==='grow';
+      const sizes=grow?[[14,1],[62,2]]:[[45,1]]; // [字号,态]：grow 态1=14px 纯黑（一半大小贴图），态2=62px 走到放大
+      tagImgs[i]={ev:e,loc,W:0,H:0,n:chars.length};
+      sizes.forEach(([FS,ST])=>{
+        const cv=document.createElement('canvas'),m=cv.getContext('2d');m.font=`700 ${FS}px "PingFang SC",sans-serif`;const tw=Math.ceil(m.measureText(t).width),W=tw+24,H=Math.round(FS*64/45);
+        if(W>tagImgs[i].W){tagImgs[i].W=W;tagImgs[i].H=H}
+        const LD=grow?0:(e.leader?48:0); // grow: 无引线（主人判词「不要线指点」）；非 grow 原行为
+        for(let k=1;k<=chars.length;k++){const s=chars.slice(0,k).join('');
+          GOLDTH.forEach((th,vi)=>{const colV=hueRot(col,-th); // goldfix 变体
+          const im=txtImg((cx)=>{cx.font=`700 ${FS}px "PingFang SC",sans-serif`;cx.textBaseline='middle';cx.lineWidth=Math.round(FS*0.2);cx.lineJoin='round';
+            if(grow&&ST===1){ // 常态小字：黑字+白描边（主人定色黑；暗底看不清的病根=描边太弱不是颜色——白描边让黑字在任何底上立起来，地图标注经典做法）
+              cx.strokeStyle='rgba(248,250,248,.92)';cx.lineWidth=Math.round(FS*0.22);cx.lineJoin='round';cx.strokeText(s,12,H/2+1);
+              cx.fillStyle='#111';cx.fillText(s,12,H/2+1)}
+            else{cx.strokeStyle='rgba(2,10,9,.88)';cx.strokeText(s,12,H/2+1);cx.fillStyle=colV;cx.fillText(s,12,H/2+1)}
+            if(LD)drawLead(cx,W,H,LD,colV)},W,H+LD);
+          const nm='tag-'+i+'-'+k+'v'+vi+'s'+ST;map.addImage(nm,im);tagImgs[i]['img'+k+'v'+vi+'s'+ST]=nm})}});});
+    // 解读卡（标题金+正文白，描边无框，标题先打完正文接力）
+    const coImgs={};
+    EVENTS.filter(e=>e.type==='callout'&&LOCS[e.location]).forEach((e,i)=>{const loc=LOCS[e.location],T=e.title||loc.name,B=e.body||'',tc=Array.from(T),bc=Array.from(B);
+      const cv=document.createElement('canvas'),m=cv.getContext('2d');m.font='700 57px "PingFang SC",sans-serif';const tw1=m.measureText(T).width;m.font='500 40px "PingFang SC",sans-serif';const tw2=m.measureText(B).width;
+      const W=Math.ceil(Math.max(tw1,tw2))+24,H=57+40+52;
+      const LD=e.leader?48:0;coImgs[i]={ev:e,loc,W,H:H+LD,nT:tc.length,n:tc.length+bc.length};
+      for(let k=1;k<=tc.length+bc.length;k++){const sT=tc.slice(0,Math.min(k,tc.length)).join(''),sB=k>tc.length?bc.slice(0,k-tc.length).join(''):'';
+        GOLDTH.forEach((th,vi)=>{const goldV=hueRot('#ffd56a',-th); // goldfix 变体
+        const im=txtImg((cx)=>{cx.textBaseline='middle';cx.lineJoin='round';
+          cx.font='700 57px "PingFang SC",sans-serif';cx.lineWidth=10;cx.strokeStyle='rgba(2,10,9,.9)';cx.strokeText(sT,12,34);cx.fillStyle=goldV;cx.fillText(sT,12,34);
+          if(sB){cx.font='500 40px "PingFang SC",sans-serif';cx.lineWidth=8;cx.strokeStyle='rgba(2,10,9,.88)';cx.strokeText(sB,12,34+52+20);cx.fillStyle='#fff';cx.fillText(sB,12,34+52+20)}if(LD)drawLead(cx,W,H,LD,goldV)},W,H+LD);
+        const nm='co-'+i+'-'+k+'v'+vi;map.addImage(nm,im);coImgs[i]['img'+k+'v'+vi]=nm})}});
+    // 点亮金点（径向光斑，goldfix 变体）
+    GOLDTH.forEach((th,vi)=>{map.addImage('lit-dot-v'+vi,txtImg((cx)=>{const g=cx.createRadialGradient(12,12,1,12,12,12);g.addColorStop(0,hexA(hueRot('#fff7c7',-th),1));g.addColorStop(.35,hexA(hueRot('#ffd166',-th),.95));g.addColorStop(.6,hexA(hueRot('#ffae2b',-th),.45));g.addColorStop(1,hexA(hueRot('#ffae2b',-th),0));cx.fillStyle=g;cx.fillRect(0,0,24,24)},24,24))});
+    window.__tagImgs=tagImgs;window.__coImgs=coImgs;
+    for(const id of['traveler','spots','spots2','lit','pls'])map.addSource(id,{type:'geojson',data:{type:'FeatureCollection',features:[]}});
+    map.addLayer({id:'lit',type:'symbol',source:'lit',layout:{'icon-image':['get','img'],'icon-size':1,'icon-allow-overlap':true,'icon-ignore-placement':true},paint:{'icon-opacity':['get','a']}});
+    // 车头徽章底座=circle 层（draped 通道，与原生线同渲染同遮挡=结构性同隐同现）：symbol icon 在 z12 mesh 会被引擎 LOD 剔除（t=8 720p 消失/1080p 出现=视口依赖判例），circle 底座保证线头可见处必有标记；
+    // 底座透明度用 b（只随事件窗），不吃 visMul——draped 元素引擎自管遮挡，叠自研净空只会引入误杀闪烁（f158 判例）
+    map.addLayer({id:'trav-base',type:'circle',source:'traveler',paint:{'circle-radius':7,'circle-color':'#102f26','circle-stroke-width':2.5,'circle-stroke-color':'#ffcf65','circle-opacity':['get','b'],'circle-stroke-opacity':['get','b'],'circle-blur':.1}});
+    map.addLayer({id:'trav-core',type:'circle',source:'traveler',paint:{'circle-radius':2.2,'circle-color':'#fff','circle-opacity':['get','b']}});
+    map.addLayer({id:'traveler',type:'symbol',source:'traveler',layout:{'icon-image':['get','ic'],'icon-size':.5,'icon-allow-overlap':true,'icon-ignore-placement':true,'icon-anchor':'bottom'},paint:{'icon-opacity':['get','a']}});
+    map.addLayer({id:'spots',type:'symbol',source:'spots',layout:{'icon-image':['get','img'],'icon-size':.5,'icon-allow-overlap':true,'icon-ignore-placement':true,'icon-offset':['get','off']},paint:{'icon-opacity':['get','a']}});
+    map.addLayer({id:'spots2',type:'symbol',source:'spots2',layout:{'icon-image':['get','img'],'icon-size':.5,'icon-allow-overlap':true,'icon-ignore-placement':true,'icon-offset':['get','off']},paint:{'icon-opacity':['get','a']}});
+    // 时刻牌（EP7 主人钦定 2026-09-22「按时间走」核心的可视化）：clock 层挂车头，走哪翻哪——journey 段进度线性插值时刻表
+    if(M.clock){const CK=M.clock;map.addSource('clocksrc',{type:'geojson',data:{type:'FeatureCollection',features:[]}});
+      for(const tm of CK.times){ // 烘时刻图: 金字黑底签
+        const mv=document.createElement('canvas').getContext('2d');mv.font='700 34px ui-monospace,monospace';
+        const W=Math.ceil(mv.measureText(tm).width)+22,H=48;
+        const im=txtImg((cx)=>{cx.font='700 34px ui-monospace,monospace';cx.textBaseline='middle';
+          cx.fillStyle='rgba(8,14,11,.92)';cx.fillRect(0,0,W,H);
+          cx.strokeStyle='rgba(255,213,106,.85)';cx.lineWidth=2;cx.strokeRect(1,1,W-2,H-2);
+          cx.fillStyle='#ffd56a';cx.fillText(tm,11,H/2+1)},W,H);
+        map.addImage('ck-'+tm,im)}
+      map.addLayer({id:'clock',type:'symbol',source:'clocksrc',layout:{'icon-image':['get','img'],'icon-size':.8,'icon-allow-overlap':true,'icon-ignore-placement':true,'icon-offset':[0,-46]},paint:{'icon-opacity':['get','a']}})}
+    for(let k=0;k<3;k++)map.addLayer({id:'pls'+k,type:'circle',source:'pls',filter:['==',['get','k'],k],paint:{'circle-radius':['get','r'],'circle-color':'rgba(0,0,0,0)','circle-stroke-width':3,'circle-stroke-color':'#ffd166','circle-stroke-opacity':['get','a'],'circle-blur':.15}});
+    map.addLayer({id:'plscore',type:'circle',source:'pls',filter:['==',['get','k'],3],paint:{'circle-radius':['get','r'],'circle-color':'#fff7c7','circle-opacity':['get','a'],'circle-blur':.6}});
+  }
+  const fc=map.cameraForBounds([[M.bounds[0],M.bounds[1]],[M.bounds[2],M.bounds[3]]],{padding:70,pitch:Math.min(basePitch,46),bearing:baseBearing});
+  fitCam={center:[fc.center.lng,fc.center.lat],zoom:Math.max(fc.zoom,11.05),pitch:Math.min(basePitch,46),bearing:baseBearing}; // zoom 钳 ≥11：与 dem 锁级（z13）对齐，summary 不跨 dem z 级（terrain LOD 突变=上下抖判例）
+  // ---- 信息面板层（EP7 2026-09-23 主人裁决：带时间点位不在地图上写字——金色箭头指向准确位置，景区外解读卡；锁机位=屏幕位静态，DOM/SVG 铁律例外见 routelayer=0 判例）----
+  if(qnum('panels',0)){
+    const PVS='http://www.w3.org/2000/svg';
+    const host=document.createElement('div');host.style.cssText='position:absolute;inset:0;pointer-events:none;font-family:"PingFang SC",sans-serif';document.body.appendChild(host);
+    const svg=document.createElementNS(PVS,'svg');svg.setAttribute('style','position:absolute;inset:0;width:100%;height:100%;pointer-events:none');svg.setAttribute('viewBox',`0 0 ${OUT.width} ${OUT.height}`);svg.setAttribute('preserveAspectRatio','none');document.body.appendChild(svg);
+    const defs=document.createElementNS(PVS,'defs');defs.innerHTML=`<linearGradient id="pvgrad" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#f0a828"/><stop offset="1" stop-color="#ffd56a"/></linearGradient><filter id="pvglow" x="-40%" y="-40%" width="180%" height="180%"><feGaussianBlur stdDeviation="2.4" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>`;
+    svg.appendChild(defs);
+    const LPBY={};EVENTS.filter(e=>e.type==='marker'&&LOCS[e.location]).forEach((e,i)=>{if(litPts[i])LPBY[e.location]=litPts[i]});
+    const cards=[];
+    EVENTS.filter(e=>e.type==='panel'&&LOCS[e.location]).forEach(e=>{
+      const loc=LOCS[e.location],sp=map.project(loc.coordinates);
+      const right=(e.side??'right')!=='left',W=240,H=74;
+      let x,y,dir=e.dir||null; // pos/dir（EP7 2026-09-23 主人判词：长海框上移箭头垂直向下、五彩池框下移箭头垂直向上——非对称布局，不挤边不遮中心）
+      if(e.pos){x=e.pos[0];y=e.pos[1]}
+      else{x=right?OUT.width-W-38:38;y=54+(e.row??0)*88}
+      const el=document.createElement('div');el.className='pv-card';
+      el.innerHTML=`<div class="pv-t"><span class="pv-tm">${e.time||''}</span><span class="pv-nm">${e.name||loc.name}</span></div><div class="pv-lk">${e.look||''}</div>`;
+      el.style.left=x+'px';el.style.top=y+'px';el.style.width=W+'px';host.appendChild(el);
+      let ax,ay,straight=false;
+      if(dir==='down'){ax=sp.x;ay=y+H;straight=true}
+      else if(dir==='up'){ax=sp.x;ay=y;straight=true}
+      else{ax=right?x:x+W;ay=y+H*.42}
+      const dx=sp.x-ax,dy=sp.y-ay,len=Math.hypot(dx,dy)||1,ux=dx/len,uy=dy/len;
+      const head=straight?16:12;
+      const hx=sp.x-ux*head,hy=sp.y-uy*head; // 箭头头部基点
+      const px=-uy,py=ux; // 法向
+      const linePath=straight
+        ?`M${ax} ${ay} L${hx} ${hy}`
+        :`M${ax} ${ay} L${(ax+hx)/2+px*Math.min(14,len*.18)} ${(ay+hy)/2+py*Math.min(14,len*.18)} L${hx} ${hy}`;
+      const g=document.createElementNS(PVS,'g');
+      g.innerHTML=`<path d="${linePath}" fill="none" stroke="url(#pvgrad)" stroke-width="2.2" stroke-linecap="round" filter="url(#pvglow)"/>`
+        +`<polygon points="${sp.x},${sp.y} ${hx+px*(straight?7:5)},${hy+py*(straight?7:5)} ${hx-px*(straight?7:5)},${hy-py*(straight?7:5)}" fill="#ffd56a" stroke="rgba(2,10,9,.6)" stroke-width="1"/>`
+        +`<circle cx="${sp.x}" cy="${sp.y}" r="4.2" fill="#fff7c7" stroke="#ffd56a" stroke-width="1.6"/>`;
+      svg.appendChild(g);
+      cards.push({ev:e,el,g,ax,ay,sp,lp:LPBY[e.location]||null,right,dir});
+    });
+    window.__pv={cards};
+  }
+  const waitSrc=()=>{if((!RLAY||C.segments.every(s=>map.isSourceLoaded('rt-'+s.id))))window.__LOADED=true;else setTimeout(waitSrc,50)}; // geojson worker 未就绪时 setPaintProperty 会丢判例：源就绪才放行渲染
+  waitSrc()});
+
+// ---- 路线 SVG overlay：三层质感（阴影+主体+流动高光），采样地形海拔投影 ----
+const SVGNS='http://www.w3.org/2000/svg',routeSvg=document.querySelector('#routes'),LngLatC=maplibregl.LngLat;
+const SAMP={},ELEV={},RPATH={};
+if(!RLAY){const defs=document.createElementNS(SVGNS,'defs');defs.innerHTML='<filter id="rglow" x="-40%" y="-40%" width="180%" height="180%"><feGaussianBlur stdDeviation="3.2" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>';routeSvg.appendChild(defs)}
+for(const s of C.segments){
+  const n=Math.max(8,Math.min(400,Math.round((SEGM[s.id]||2000)/60))),pts=[]; // 60m 间距（漂移判例：地理采样太稀=线切弯+海拔插值错位，相机一动线在坡上滑）
+  for(let i=0;i<=n;i++)pts.push(pointAt(s.coordinates,SEGLEN[s.id],i/n));
+  SAMP[s.id]=pts;ELEV[s.id]=new Array(pts.length).fill(null);
+  if(!RLAY){const g={};
+  for(const k of['e','l','h']){const p=document.createElementNS(SVGNS,'path');p.setAttribute('fill','none');p.setAttribute('stroke-linecap','round');p.setAttribute('stroke-linejoin','round');p.setAttribute('pathLength','1');p.setAttribute('stroke-opacity','0');routeSvg.appendChild(p);g[k]=p}
+  g.e.setAttribute('stroke',edgeOf(s.style.color));g.e.setAttribute('stroke-width','13');
+  g.l.setAttribute('stroke',s.style.color);g.l.setAttribute('stroke-width','7');g.l.setAttribute('filter','url(#rglow)'); // 加粗+发光：细线在复杂卫星纹理上不突出=「死图」观感判例
+  g.h.setAttribute('stroke','#ffffff');g.h.setAttribute('stroke-width','3');
+  RPATH[s.id]=g}
+}
+const locPt=(c,ele)=>{try{return map.transform.locationPoint(LngLatC.convert(c),ele)}catch(_){try{return map.transform.locationPoint(LngLatC.convert(c),0)}catch(_){return map.project(c)}}}; // terrain 未 ready 时 locationPoint 会炸（getElevationForLngLatZoom 判例），逐级降级
+const TEX=qnum('tex',M.terrainExaggeration??2.0); // 与 setTerrain exaggeration 一致（tex URL 扫参：TEX 放大=石柱林戏剧性，也放大山脊遮挡）
+const segElevAt=(segId,q)=>{const s=SEGS[segId],ev=s.elevations; // 逐顶点海拔优先（与 terrain mesh 同 dem 锁级=icon 贴线零漂移判例）；无则退回剖面插值
+  if(ev&&ev.length===s.coordinates.length){const lens=SEGLEN[segId],d=Math.max(0,Math.min(1,q))*lens.at(-1);let i=1;while(i<lens.length&&lens[i]<d)i++;if(i>=lens.length)return ev.at(-1);const f=(d-lens[i-1])/(lens[i]-lens[i-1]||1),v0=ev[i-1]??ev[i],v1=ev[i]??v0;return v0==null?null:v0+(v1-v0)*f}
+  const g=GPROF[segId];if(!g)return null;const f=Math.max(0,Math.min(1,q))*(g.length-1),i0=Math.floor(f),i1=Math.min(g.length-1,i0+1),fr=f-i0,v0=g[i0]??g[i1],v1=g[i1]??v0;return v0==null?null:v0+(v1-v0)*fr}; // 编译期地面剖面插值（运行时 queryTerrainElevation 返回 1/TEX 缩放值+负海拔错乱判例：路线按错高投影→相机一动路线相对地面滑动=漂移本体）
+const projDet=(pt,ele)=>{ // 确定性 3D 投影：pixelMatrix3D×[merc×worldSize]（coordinatePoint 官方路径手算，只依赖相机状态）——不碰 terrain 运行时状态（map.project 状态依赖判例；坐标必须 ×worldSize，归一化输入会把 overlay 投到屏外判例）
+  const lat=pt[1]*Math.PI/180,ws=map.transform.worldSize;
+  const mx=(pt[0]+180)/360*ws;
+  const my=(1-Math.log(Math.tan(Math.PI/4+lat/2))/Math.PI)/2*ws;
+  const mz=(ele||0)*Math.cos(lat)/40075016.686*ws;
+  const M4=map.transform.pixelMatrix3D||map.transform.pixelMatrix;
+  const vx=M4[0]*mx+M4[4]*my+M4[8]*mz+M4[12];
+  const vy=M4[1]*mx+M4[5]*my+M4[9]*mz+M4[13];
+  const vw=M4[3]*mx+M4[7]*my+M4[11]*mz+M4[15];
+  return{x:vx/vw,y:vy/vw,w:vw}};
+const projGround=pt=>projDet(pt,0); // 兼容留名（勿用：海拔 0=海平面判例）
+// 遮挡一致性：v4.7.1 symbol 层不吃地形遮挡（t=8 实证：线被脊吞时 icon 仍浮脊面；queryRenderedFeatures=空不可信，t=13.2 icon 肉眼可见时 qr 同样为空）——
+// 故 GL 符号统一乘 visMul（几何射线 vs demGrid，判据与 draped 线同源）实现同隐同现；自研 clearance 初代因相机位算错（center 正上方）废弃，现按 alt×tan(pitch) 反演重生。
+const sliceLine=(s,q0,q1)=>{const pts=SAMP[s.id],n=pts.length; // 弧长区间切片（生长头与 journey 同度量判例）：SAMP=60m 重采样点列
+  const f0=Math.max(0,Math.min(1,q0))*(n-1),f1=Math.max(0,Math.min(1,q1))*(n-1);
+  if(f1<=f0)return null;
+  const k0=Math.floor(f0),k1=Math.floor(f1),out=[];
+  if(k0<n-1){const fr=f0-k0;out.push([pts[k0][0]+(pts[Math.min(k0+1,n-1)][0]-pts[k0][0])*fr,pts[k0][1]+(pts[Math.min(k0+1,n-1)][1]-pts[k0][1])*fr])}
+  for(let i=k0+1;i<=Math.min(k1,n-1);i++)out.push(pts[i]);
+  if(k1<n-1&&f1>k1){const fr=f1-k1;out.push([pts[k1][0]+(pts[k1+1][0]-pts[k1][0])*fr,pts[k1][1]+(pts[k1+1][1]-pts[k1][1])*fr])}
+  return out.length>1?out:null};
+const screenPath=(s,q0=0,q1=1)=>{ // 画地理弧长区间 [q0,q1] 的屏幕路径，两端插值——生长头/高光头与车同一地理度量（dasharray 按屏幕弧长截断会与车的地理位置透视错配：远处压缩车比线快、近处拉伸线比车快=车路线不同步判例）
+  // w≤0（相机身后点）必须断路：透视除法把身后点镜像到对侧天空=长直鬼线横贯画面判例（跟拍模式 t=13 已走路线在身后→镜像线盖山脊）
+  const pts=SAMP[s.id],n=pts.length;
+  const elev=i=>{const e=segElevAt(s.id,i/(n-1));return e==null?0:e*TEX}; // 编译期地面剖面×TEX：与 terrain mesh 同体系
+  const f0=Math.max(0,Math.min(1,q0))*(n-1),f1=Math.max(0,Math.min(1,q1))*(n-1);
+  const k0=Math.floor(f0),k1=Math.floor(f1);
+  if(f1<=0)return '';
+  let d='',pen=false;
+  const emit=(p,move)=>{if(p.w<=0){pen=false;return}d+=(move||!pen?'M':'L')+p.x.toFixed(1)+','+p.y.toFixed(1);pen=true};
+  if(q0>0&&k0<n-1){const fr=f0-k0,pt=[pts[k0][0]+(pts[k0+1][0]-pts[k0][0])*fr,pts[k0][1]+(pts[k0+1][1]-pts[k0][1])*fr];emit(projDet(pt,elev(k0)+(elev(k0+1)-elev(k0))*fr+8),true)}
+  else emit(projDet(pts[0],elev(0)+8),true);
+  for(let i=k0+1;i<=Math.min(k1,n-1);i++)emit(projDet(pts[i],elev(i)+8));
+  if(k1<n-1&&f1>k1){const fr=f1-k1,pt=[pts[k1][0]+(pts[k1+1][0]-pts[k1][0])*fr,pts[k1][1]+(pts[k1+1][1]-pts[k1][1])*fr];emit(projDet(pt,elev(k1)+(elev(k1+1)-elev(k1))*fr+8))}
+  return d};
+
+// ---- DOM 覆盖物：小人 / 脉冲 / 标签 / 解读卡 ----
+const badge=inner=>'<svg class="hiker" viewBox="0 0 46 60" aria-label="traveler"><path d="M23 59L17 49H29Z" fill="#ffb648" stroke="#fff" stroke-width="2"/><circle cx="23" cy="25" r="21" fill="#102f26" stroke="#ffcf65" stroke-width="3"/>'+inner+'</svg>';
+const ICONS={ // 移动主体按交通方式换徽章图标（质感路线判例：车/缆车沿路线移动是动线可读性本体）
+ walk:badge('<g transform="translate(12 8) scale(.058)"><path fill="#fff" d="M192 48a48 48 0 1 1 96 0 48 48 0 1 1-96 0zm51.3 182.7L224.2 307l49.7 49.7c9 9 14.1 21.2 14.1 33.9V480c0 17.7-14.3 32-32 32s-32-14.3-32-32v-82.7l-73.9-73.9c-15.8-15.8-22.2-38.6-16.9-60.3l20.4-84c8.3-34.1 42.7-54.9 76.7-46.4 19 4.8 35.6 16.4 46.4 32.7L305.1 208H336v-24c0-13.3 10.7-24 24-24s24 10.7 24 24v304c0 13.3-10.7 24-24 24s-24-10.7-24-24V272h-39.4c-16 0-31-8-39.9-21.4l-13.3-20zM81.1 471.9L117.3 334c3 4.2 6.4 8.2 10.1 11.9l41.9 41.9-26.4 100.3c-4.5 17.1-22 27.3-39.1 22.8s-27.3-22-22.8-39.1zm55.5-346-35.2 140.6c-3 12.1-14.9 19.9-27.2 17.9l-47.9-8c-14-2.3-22.9-16.3-19.2-30L31.9 155c9.5-34.8 41.1-59 77.2-59h4.2c15.6 0 27.1 14.7 23.3 29.8z"/></g>'),
+ bus:badge('<rect x="12" y="14" width="22" height="16" rx="4" fill="#fff"/><rect x="15.5" y="17.5" width="6" height="5" rx="1" fill="#102f26"/><rect x="24.5" y="17.5" width="6" height="5" rx="1" fill="#102f26"/><circle cx="17" cy="31" r="2.6" fill="#102f26" stroke="#fff" stroke-width="1.6"/><circle cx="29" cy="31" r="2.6" fill="#102f26" stroke="#fff" stroke-width="1.6"/>'),
+ cable:badge('<line x1="23" y1="5" x2="23" y2="13" stroke="#fff" stroke-width="2.6"/><path d="M14 14h18l-2.6 15H16.6z" fill="#fff"/><rect x="18.5" y="17.5" width="9" height="6" rx="1.2" fill="#102f26"/>'),
+ // drive/flight 补位（EP6川西 v2 判例：mode 无 icon 静默 fallback walk=开车路线挂走路小人=「地图一塌糊涂」病灶之一，2026-09-17）
+ drive:badge('<g transform="translate(10 10) scale(.052)"><path fill="#fff" d="M135.2 117.4L109.1 192H402.9l-26.1-74.6C372.3 104.6 360.2 96 346.6 96H165.4c-13.6 0-25.7 8.6-30.2 21.4zM39.6 196.8L74.8 96.3C88.3 57.8 124.6 32 165.4 32H346.6c40.8 0 77.1 25.8 90.6 64.3l35.2 100.5c23.2 9.6 39.6 32.4 39.6 59.2V400c0 17.7-14.3 32-32 32H448c-17.7 0-32-14.3-32-32V384H96v16c0 17.7-14.3 32-32 32H32c-17.7 0-32-14.3-32-32V256c0-26.8 16.4-49.6 39.6-59.2zM128 288a32 32 0 1 0 -64 0 32 32 0 1 0 64 0zM448 288a32 32 0 1 0 -64 0 32 32 0 1 0 64 0z"/></g>'),
+ flight:badge('<g transform="translate(5 11) scale(.042)"><path fill="#fff" d="M482.3 192c34.2 0 93.7 29 93.7 64c0 36-59.5 64-93.7 64l-116.6 0L265.2 495.9c-5.7 10-16.3 16.1-27.8 16.1l-56 0c-10.6 0-18.3-10.2-15.4-20.4l49-171.6L112 320 68.8 377.6c-3 4-7.8 6.4-12.8 6.4l-42 0c-7.8 0-14-6.9-14-15.6c0-1.7 .3-3.4 1-5L38.8 256 1 148.4c-.7-1.6-1-3.3-1-5c0-8.7 6.2-15.6 14-15.6l42 0c5 0 9.8 2.4 12.8 6.4L112 192l102.9 0-49-171.6C162.9 10.2 170.8 0 181.4 0l56 0c11.5 0 22.1 6.2 27.8 16.1L365.7 192l116.6 0z"/></g>')};
+const hiker=document.createElement('div');hiker.className='hiker-wrap ol';hiker.innerHTML=ICONS.walk;hiker._ic='walk';
+const overlayRoot=document.createElement('div');overlayRoot.style.cssText='position:absolute;inset:0;pointer-events:none;overflow:hidden';document.querySelector('#map').appendChild(overlayRoot);
+overlayRoot.appendChild(hiker);
+const pulse=document.createElement('div');pulse.className='pulse ol';pulse.style.cssText='position:absolute;left:0;top:0;opacity:1'; // 必须内联 absolute：样式表 .pulse{position:relative} 与 .ol{position:absolute} 同优先级且声明在后→覆盖成 relative→多个 pulse 在 overlayRoot 里文档流竖排，每个下移 14px=光圈集体偏离锚点判例；opacity:1 同理（样式表 .pulse{opacity:0} 是 Marker 时代遗留，迁 DOM 后无人覆盖→光圈整体隐形判例）。显隐由子级 ring/core 透明度承担
+pulse.innerHTML='<i class="ring"></i><i class="ring"></i><i class="ring"></i><i class="core"></i>';
+overlayRoot.appendChild(pulse);
+// 定点 hold 每事件一个光圈：多景区可同时常亮（张家界三角"三个地方"同框判例）；无 location 的跟随 hold 仍走单 pulse
+const locPulses=[];
+EVENTS.forEach(e=>{if(e.type!=='hold'||!e.location||!LOCS[e.location])return;const p=document.createElement('div');p.className='pulse ol';p.style.cssText=pulse.style.cssText;p.innerHTML=pulse.innerHTML;overlayRoot.appendChild(p);locPulses.push({el:p,ev:e,loc:LOCS[e.location]})});
+// Marker 弃用判例：Marker DOM 位置由 MapLibre 渲染循环异步更新，jumpTo 截图与 rAF 相位差→车/tag 位置逐帧抖动；且海拔投影依赖 dem 瓦片运行时状态（同 t 打乱相机后重截车位置差 60px 判例）。overlay 一律手动 projGround 同步定位=端到端确定性
+const placeEl=(el,pt,anchor,offset,ele)=>{const p=projDet(pt,ele||0);const ox=(offset?offset[0]:0),oy=(offset?offset[1]:0);
+  el.style.visibility=p.w<=0?'hidden':'visible'; // 相机身后点透视镜像判例：w≤0 必须隐藏（同 screenPath 断路）
+  el.style.transform='translate('+p.x.toFixed(1)+'px,'+p.y.toFixed(1)+'px) translate(calc(-50% + '+ox+'px),calc('+(anchor==='bottom'?'-100%':'-50%')+' + '+oy+'px))'}; // 第二分量必须整段 calc()：oy≠0 时裸写 "-50% + 44px" 是非法 CSS，整条 transform 被丢弃→标签钉在 (0,0) 被 edgeK 隐没（张家界三角 marker 集体消失判例）
+const kindCls=k=>({stay:'stay',entry:'entry',gate:'entry',exit:'exit'})[k]||'';
+const tags={};
+EVENTS.filter(e=>e.type==='marker'&&LOCS[e.location]).forEach((e,i)=>{const loc=LOCS[e.location];const root=document.createElement('div'),el=document.createElement('div');root.style.cssText='position:absolute;left:0;top:0;pointer-events:none';el.className='tag '+(e.kind||kindCls(loc.kind));el.textContent=e.title||loc.name;root.appendChild(el);overlayRoot.appendChild(root);tags[i]={el,root,loc,off:e.offset||[64,-20-i*30],ev:e}});
+const calls={};
+EVENTS.filter(e=>e.type==='callout'&&LOCS[e.location]).forEach((e,i)=>{const loc=LOCS[e.location];const side=e.side||(loc.coordinates[0]<M.center[0]?'left':'right');const root=document.createElement('div'),el=document.createElement('div');root.className='callout-marker';root.style.cssText='position:absolute;left:0;top:0;pointer-events:none';el.className='callout '+side;el.innerHTML='<span class="pin"></span><span class="lead"></span><div class="card"><b></b><i></i></div>';el.querySelector('b').textContent=e.title||loc.name;el.querySelector('i').textContent=e.body||'';root.appendChild(el);overlayRoot.appendChild(root);calls[i]={el,root,loc,ev:e}});
+const legend=document.querySelector('#legend');legend.style.bottom=((C.output&&C.output.legendBottom)||44)+'px';if(C.output&&C.output.legendWrap){legend.style.flexWrap='wrap';legend.style.maxWidth=(C.output.legendMaxWidth||1200)+'px';}
+{const seen=new Set();legend.innerHTML=C.segments.filter(s=>s.style.label).filter(s=>{const k=s.style.label+'|'+s.style.color;if(seen.has(k))return false;seen.add(k);return true}).map(s=>`<span class="pill" data-label="${s.style.label}"><b style="background:${s.style.color}"></b>${s.style.label}</span>`).join('')}
+document.querySelector('#credit').textContent=M.attribution||'MapLibre · 路线示意';
+const titleEl=document.querySelector('#title');
+if(C.storyboard.title){titleEl.innerHTML='';titleEl.append(document.createTextNode(C.storyboard.title));const sm=document.createElement('small');sm.textContent=C.storyboard.subtitle||'';titleEl.append(sm)}
+
+// ---- __setT：纯函数渲染 ----
+const RETAIN=qnum('retain',G0.retain??.42); // 已走路线留存透明度：总览/信息图场景要更实（张家界三角 .42 淡到断线判例），跟拍场景保持 .42；项目级走 map.grade.retain，临时扫参走 ?retain=
+window.__camAt=camAt;window.__map=map;window.__journeyAt=journeyAt;window.__visMul=visMul;window.__segElevAt=segElevAt; // 数值复现/调试探针：camAt/visMul/segElevAt 是纯函数可直接导出设计轨迹与净空判定
+window.__setT=t=>{
+  window.__IDLE=false; // setData/瓦片竞态判例：旧 true 残留会在 worker/瓦片未就绪时截图；idle 事件（含源处理完）+100ms 去抖翻回
+  const cam=camAt(t);map.jumpTo({center:cam.center,zoom:cam.zoom+(cam._breathe||0),pitch:cam.pitch,bearing:cam.bearing});
+  map.transform.elevation=cam.ground||0; // 冻结值=cam 中心真实地面（不乘TEX）：elevation=0 在高海拔钻山全黑（EP6川西亚丁4371m terrain×1.5=6557盖过相机，2026-09-17数值复现定罪）；elevation=地面×TEX 世界下压偏远偏小（v16判例）；ground×1 与 zoom=log2(K/(agl+g)) 的「相机在 ground 上方 agl」语义同体系——低海拔段与0等效（差异<2%），高海拔段是生死线
+  if(map.transform._calcMatrices)map.transform._calcMatrices(); // jumpTo 后 pixelMatrix3D 不立即更新（滞后在 render 循环）——同步链路必须手动重算，否则 overlay 用上一帧相机矩阵=整体偏移+帧历史依赖（同 t 打乱重截路线位置两态判例）
+  const hazeEl=document.querySelector('#haze'); // 大气 veil 逐帧驱动：pitch<35 几乎无地平=无霾；zoom 越低（越高空）整体大气越厚
+  if(HAZE.k>0){const pitchK=Math.max(0,Math.min(1,(cam.pitch-35)/30)),altK=Math.max(0,Math.min(1,(14.8-cam.zoom)/5));
+    const s=HAZE.k*(.3*altK+.7*pitchK);
+    hazeEl.style.background=s>.005?`linear-gradient(180deg,${hexA(HAZE.col,s*.92)} 0%,${hexA(HAZE.col,s*.48)} 26%,${hexA(HAZE.col,s*.14)} 46%,rgba(0,0,0,0) 62%)`:'none'}
+  else hazeEl.style.background='none';
+  let GV=0;
+  if(CFALT.on){const k=ease(Math.max(0,Math.min(1,(cam.zoom-CFALT.z0)/(CFALT.z1-CFALT.z0)))); // 海拔自适应调色：高空弱染→低空强染，ease 连续
+    const hueNow=CFALT.h0+(CFALT.h1-CFALT.h0)*k;
+    document.querySelector('#map canvas').style.filter=`saturate(${(CFALT.s0+(CFALT.s1-CFALT.s0)*k).toFixed(3)}) contrast(${CFALT.con}) brightness(${CFALT.bri}) hue-rotate(${hueNow.toFixed(1)}deg)`;
+    if(GOLDFIX){GV=goldVi(hueNow); // 金色反向补偿：烘焙变体就近切换+circle 层逐帧精确补偿（setPaintProperty 幂等，guard 防未 load 期调用崩）
+      if(map.getLayer('plscore')){const c1=hueRot('#ffd166',-hueNow),c2=hueRot('#fff7c7',-hueNow),c3=hueRot('#ffcf65',-hueNow);
+        for(let kk=0;kk<3;kk++)map.setPaintProperty('pls'+kk,'circle-stroke-color',c1);
+        map.setPaintProperty('plscore','circle-color',c2);map.setPaintProperty('trav-base','circle-stroke-color',c3)}}}
+  const st=stageAt(t),inSummary=st.kind==='summary';
+  for(const s of C.segments){
+    const ev=routes.find(r=>r.segment===s.id);let p=0,alpha=0;
+    if(ev){if(t>=ev.end){p=1;alpha=inSummary?.9:RETAIN}else if(t>=ev.start){p=ease((t-ev.start)/(ev.end-ev.start));alpha=fade(t,ev.start,ev.start+.3)}}
+    if(p===0&&inSummary&&st.ev.alsoShow&&st.ev.alsoShow[s.id]!=null){p=1;alpha=st.ev.alsoShow[s.id]*fade(t,st.ev.start,st.ev.start+.6)} // 总览期带出备选线（如老人版）
+    // 顶部流动高光：生长期跟生长头（同地理度量区间 [p-.11,p]），走完后扫过一次即收
+    let hR=null,ha=0;
+    if(ev){if(t>=ev.start&&t<ev.end&&p>0){hR=[Math.max(0,p-.11),p];ha=alpha}else if(t>=ev.end&&t<ev.end+1.0){const q=(t-ev.end)/1.0;hR=[Math.max(0,q-.11),q];ha=.9*(1-q*.6)}}
+    if(RLAY){const pc=Math.min(pfix>=0?pfix:p,.999),pa=pfix>=0?.9:alpha; // 弧长切片生长：头=journey 同度量
+      const main=sliceLine(s,0,pc);
+      map.getSource('rt-'+s.id).setData(main&&pa>.005?{type:'Feature',properties:{},geometry:{type:'LineString',coordinates:main}}:{type:'FeatureCollection',features:[]});
+      map.setPaintProperty('rt-e-'+s.id,'line-opacity',main?pa*(s.style.glow?0.6:1):0);map.setPaintProperty('rt-l-'+s.id,'line-opacity',main?pa:0);
+      if(ha>0&&hR){const hi=sliceLine(s,hR[0],hR[1]);if(hi)map.getSource('rth-'+s.id).setData({type:'Feature',properties:{},geometry:{type:'LineString',coordinates:hi}});map.setPaintProperty('rt-h-'+s.id,'line-opacity',hi?ha*.95:0)}
+      else{map.getSource('rth-'+s.id).setData({type:'FeatureCollection',features:[]});map.setPaintProperty('rt-h-'+s.id,'line-opacity',0)}
+    }else{const g=RPATH[s.id]; // 纯 SVG 模式（routelayer=0 锁机位项目）；跟拍模式禁双轨（主人：没有什么双轨，两轨不一致=直播飘判死）
+    if(alpha>.005){const d=screenPath(s,0,p);g.e.setAttribute('d',d);g.l.setAttribute('d',d)}
+    if(ha>0&&hR){g.h.setAttribute('d',screenPath(s,hR[0],hR[1]))}
+    g.e.setAttribute('stroke-opacity',alpha.toFixed(3));g.l.setAttribute('stroke-opacity',alpha.toFixed(3));g.h.setAttribute('stroke-opacity',(ha*.95).toFixed(3));
+    }
+    const pill=legend.querySelector(`[data-label="${s.style.label}"]`);if(pill&&st.kind==='route'&&st.ev.segment===s.id)pill.style.opacity=1;else if(pill&&!(routes.some(r=>t>=r.start&&t<=r.end&&SEGS[r.segment].style.label===s.style.label)))pill.style.opacity=p>0?.55:.4;
+  }
+  const j=journeyAt(t);
+  if(GLSYM){ // GL 符号层逐帧驱动（与原生线同管线贴地=引擎级对齐，主人「没有什么双轨」判例）
+    const EMPTY={type:'FeatureCollection',features:[]};
+    const moving2=j&&j.active&&SEGS[j.seg].style.traveler!==false,parked2=j&&j.active===false&&t>(firstRoute?.start??1e9)&&!inSummary&&SEGS[j.seg].style.traveler!==false;
+    const trav=map.getSource('traveler');
+    if(j&&(moving2||parked2)){const mode=SEGS[j.seg].mode,fin=moving2?fade(t,st.ev?st.ev.start:0,(st.ev?st.ev.start:0)+.4):.92;
+      const je=segElevAt(j.seg,j.p),vm=visMul(j.pos[0],j.pos[1],je==null?0:je,t); // 净空同步只约束 symbol icon（真遮挡时不悬空）；circle 底座 draped 引擎自管
+      window.__lastTrav={t,moving2,parked2,je,vm,fin,seg:j.seg}; // 调试探针
+      trav.setData({type:'FeatureCollection',features:[{type:'Feature',geometry:{type:'Point',coordinates:j.pos},properties:{ic:'ic-'+(ICONS[mode]?mode:'walk')+'-v'+GV,a:fin*vm,b:fin}}]})}
+    else trav.setData(EMPTY);
+    if(map.getSource('clocksrc')&&j){ // 时刻牌跟随（EP7「按时间走」核心可视化）：段进度→时刻表线性插值，走哪翻哪
+      const CK=M.clock,ri=routes.findIndex(r=>r.segment===j.seg);
+      if(ri>=0){const r=routes[ri],p=j.active?j.p:1;
+        const t0=CK.stops[ri],t1=CK.stops[ri+1],cur=t0+(t1-t0)*p;
+        const hh=Math.floor(cur/60),mm=Math.floor(cur%60/5)*5; // 5 分钟粒度
+        const tm=String(hh).padStart(2,'0')+':'+String(mm).padStart(2,'0');
+        map.getSource('clocksrc').setData({type:'FeatureCollection',features:[{type:'Feature',geometry:{type:'Point',coordinates:j.pos},properties:{img:'ck-'+tm,a:.95}}]})}
+      else map.getSource('clocksrc').setData({type:'FeatureCollection',features:[]})}
+    const feats=[],feats2=[];
+    if(window.__pv){ // 面板逐帧驱动（EP7 2026-09-23 主人裁决：走到哪亮哪——总揽=路线画到该点该卡才出现（累积到收），beat=旅人到点才出现，未到的卡一律不展示；确定性渲染禁 CSS animation）
+      for(const c of window.__pv.cards){
+        let k=0,on=false;
+        if(c.lp&&!c.lp.off){
+          let trev=null;
+          if(NOJ){const ev=routes.find(r=>r.segment===c.lp.seg);if(ev)trev=ev.start+c.lp.q*(ev.end-ev.start)} // 总揽：画线进度到达该点弧长的时刻
+          else{const js=j?segOrder.indexOf(j.seg):-1,ls=segOrder.indexOf(c.lp.seg);
+            if(js>ls)trev=-10;else if(js===ls){const ev=routes.find(r=>r.segment===c.lp.seg);trev=ev.start+c.lp.q*(ev.end-ev.start)}
+            on=j&&j.seg===c.lp.seg&&Math.abs(j.p-c.lp.q)<(c.ev.growWin??.08)} // beat：到达窗内高亮
+          if(trev!=null)k=fade(t,trev,trev+.45);
+        }
+        c.el.style.opacity=k.toFixed(3);
+        const slide=c.dir==='down'?-1:c.dir==='up'?1:(c.right?1:-1);
+        c.el.style.transform='translate'+(c.dir?'Y':'X')+'('+(slide*(1-k)*14).toFixed(1)+'px)';
+        c.el.classList.toggle('on',on&&k>.6);
+        c.g.style.opacity=k.toFixed(3);
+      }
+    }
+    for(const i in (window.__tagImgs||{})){const tg=window.__tagImgs[i],ev=tg.ev,end=ev.end>ev.start?ev.end:DUR;const a=Math.min(fade(t,ev.start,ev.start+.35),1-fade(t,end-.4,end)); // 信息陈设豁免净空（判例⑤）：位置由 GL 投影锁死=不飘，隐现反而丢解读拍
+      if(a>.02){const k=Math.max(1,Math.min(tg.n,1+Math.floor((t-ev.start)/.07))); // 打字机：70ms/字逐字右长（全宽画布左对齐=零抖动）
+        let nm=ev.litMode==='grow'?'s1':''; // 双态后缀；旧 key 兜底（无任何态图时回退无后缀 key=兼容老项目）
+        let vis=a; // grow 三态可见度：未到=1（小黑字）、走到窗口=1（放大）、走过=0（消失，痕迹=lit 金点）
+        if(ev.litMode==='grow'&&j){const LP=litPts[i]; // 走到放大（EP7 主人终判词 v3「走到的时候放大，走过了再消失」）：距离窗内切 s2 大字全亮；一旦走过（j 越过该点弧长或进入更后段）隐藏
+          if(LP&&!LP.off){const passed=(segOrder.indexOf(j.seg)>segOrder.indexOf(LP.seg))||(j.seg===LP.seg&&j.p>LP.q+(ev.growWin??.08));
+            if(passed)vis=0; // 走过→消失（小字也不回来）
+            else if(j.seg===LP.seg&&Math.abs(j.p-LP.q)<(ev.growWin??.08))nm='s2'}}
+        const key='img'+k+'v'+GV+nm;
+        if(vis>.02)feats.push({type:'Feature',geometry:{type:'Point',coordinates:tg.loc.coordinates},properties:{img:tg[key]||tg['img'+k+'v'+GV],a:vis,off:tg.ev.offset||(tg.ev.leader?[0,-tg.H]:[0,-tg.H/2-24])}})}}
+    for(const i in (window.__coImgs||{})){const cg=window.__coImgs[i],ev=cg.ev,end=ev.end>ev.start?ev.end:DUR;const a=Math.min(fade(t,ev.start,ev.start+.3),1-fade(t,end-.3,end));
+      if(a>.02){const k=Math.max(1,Math.min(cg.n,1+Math.floor((t-ev.start)/.07))); // 标题逐字→正文接力
+        feats2.push({type:'Feature',geometry:{type:'Point',coordinates:cg.loc.coordinates},properties:{img:cg['img'+k+'v'+GV],a,off:cg.ev.offset||(cg.ev.leader?[0,-cg.H]:[0,-cg.H/2-36])}})}}
+    map.getSource('spots').setData(feats.length?{type:'FeatureCollection',features:feats}:EMPTY);
+    map.getSource('spots2').setData(feats2.length?{type:'FeatureCollection',features:feats2}:EMPTY);
+    const litF=j?litPts.filter(L=>!L.off&&(segOrder.indexOf(j.seg)>segOrder.indexOf(L.seg)||(j.seg===L.seg&&j.p>=L.q))).map(L=>({type:'Feature',geometry:{type:'Point',coordinates:L.c},properties:{img:'lit-dot-v'+GV,a:.9*visMul(L.c[0],L.c[1],segElevAt(L.seg,L.q)||0,t)}})).filter(f=>f.properties.a>.02):[];
+    map.getSource('lit').setData(litF.length?{type:'FeatureCollection',features:litF}:EMPTY);
+    const pf=[];
+    EVENTS.forEach(e=>{ // 多光圈判例落地：窗口内 location hold 各亮各的（EP5 三景区开场）；camFollow hold 只出光圈不抢相机
+      if(e.type!=='hold'||!e.location||!LOCS[e.location])return;
+      const eEnd=e.end>e.start?e.end:DUR;if(t<e.start||t>eEnd)return;
+      const c=LOCS[e.location].coordinates;
+      const pOn=fade(t,e.start,e.start+.35)*(1-fade(t,eEnd-.3,eEnd)),pT=t-e.start;
+      for(let k=0;k<3;k++){const q=((pT*.56)+k/3)%1;pf.push({type:'Feature',geometry:{type:'Point',coordinates:c},properties:{k,r:14+q*120,a:pOn*Math.pow(1-q,1.25)*.9}})}
+    });
+    if(j){ // grow 走到光圈（EP7 主人判词 v5「走到的地方，光圈加大金色文字」）：车在 grow 点距离窗内=该点光圈扩散+金大字
+      for(const i in (window.__tagImgs||{})){const tg=window.__tagImgs[i],ev=tg.ev,LP=litPts[i];
+        if(ev.litMode!=='grow'||!LP||LP.off||j.seg!==LP.seg||Math.abs(j.p-LP.q)>=(ev.growWin??.08))continue;
+        const c=tg.loc.coordinates,pT=Math.max(0,(ev.growWin??.08)-Math.abs(j.p-LP.q))*4; // 窗内停留时长→扩散相位
+        for(let k=0;k<3;k++){const q=((pT*.56)+k/3)%1;pf.push({type:'Feature',geometry:{type:'Point',coordinates:c},properties:{k,r:14+q*140,a:.9*Math.pow(1-q,1.2)}})}
+        pf.push({type:'Feature',geometry:{type:'Point',coordinates:c},properties:{k:3,r:10,a:.95}})}
+    }
+    if(st.kind==='hold'&&!st.ev.location){const c=j?j.pos:M.center; // 无 location 跟随 hold 仍走原单 pulse
+      const pOn=fade(t,st.ev.start,st.ev.start+.35)*(1-fade(t,(st.ev.end>st.ev.start?st.ev.end:DUR)-.3,st.ev.end>st.ev.start?st.ev.end:DUR)),pT=t-st.ev.start;
+      for(let k=0;k<3;k++){const q=((pT*.56)+k/3)%1;pf.push({type:'Feature',geometry:{type:'Point',coordinates:c},properties:{k,r:14+q*120,a:pOn*Math.pow(1-q,1.25)*.9}})}
+      pf.push({type:'Feature',geometry:{type:'Point',coordinates:c},properties:{k:3,r:7+2*Math.sin(pT*5),a:pOn}})}
+    map.getSource('pls').setData(pf.length?{type:'FeatureCollection',features:pf}:EMPTY);
+  }
+  if(!GLSYM){ // DOM 旧路径（回退）
+  if(j&&hiker._ic!==SEGS[j.seg].mode){const ic=ICONS[SEGS[j.seg].mode]||ICONS.walk;hiker.innerHTML=ic;hiker._ic=SEGS[j.seg].mode}
+  const person=hiker.querySelector('.hiker');
+  const moving=j&&j.active&&SEGS[j.seg].style.traveler!==false; // 行进期：主体沿线走（车/缆车/小人均有岗位）
+  const parked=j&&j.active===false&&t>(firstRoute?.start??1e9)&&!inSummary&&SEGS[j.seg].style.traveler!==false; // 间隙停在上次终点
+  if(j&&(moving||parked)){const mode=SEGS[j.seg].mode;const je=segElevAt(j.seg,j.p);placeEl(hiker,j.pos,'bottom',mode==='cable'?[0,-15]:null,(je==null?0:je*TEX));person.style.opacity=moving?fade(t,st.ev?st.ev.start:0,(st.ev?st.ev.start:0)+.4):.92;
+    person.style.transform=mode==='walk'?'translateY('+(-2*Math.abs(Math.sin(t*8)))+'px) rotate('+(2*Math.sin(t*8))+'deg)':mode==='cable'?'rotate('+(2.5*Math.sin(t*2.6))+'deg)':''}
+  else person.style.opacity=0;
+  let pulseOn=0,pulseT=0;
+  if(st.kind==='hold'&&!st.ev.location){const j2=journeyAt(t);const c=j2?j2.pos:M.center;const pe=j2?(segElevAt(j2.seg,j2.p)||0)*TEX:0;placeEl(pulse,c,'center',null,pe);pulseOn=fade(t,st.ev.start,st.ev.start+.35)*(1-fade(t,(st.ev.end>st.ev.start?st.ev.end:DUR)-.3,st.ev.end>st.ev.start?st.ev.end:DUR));pulseT=t-st.ev.start}
+  else placeEl(pulse,M.center,'center',null,0); // 单 pulse 闲时归位，透明度由 pulseOn=0 保证
+  // 注意：pulse 透明度必须打在子级（MapLibre Marker 本体 opacity 判例）
+  pulse.querySelectorAll('.ring').forEach((ring,i)=>{const q=((pulseT*.56)+i/3)%1;ring.style.transform=`scale(${.65+q*6.2})`;ring.style.opacity=pulseOn*Math.pow(1-q,1.25)*.9});
+  const core=pulse.querySelector('.core');core.style.transform=`scale(${1+.28*Math.sin(pulseT*5)})`;core.style.opacity=pulseOn;
+  for(const pu of locPulses){const e2=pu.ev.end>pu.ev.start?pu.ev.end:DUR;const on=fade(t,pu.ev.start,pu.ev.start+.35)*(1-fade(t,e2-.3,e2));const pt2=Math.max(0,t-pu.ev.start);placeEl(pu.el,pu.loc.coordinates,'center',null,(pu.loc.ground||0)*TEX);pu.el.querySelectorAll('.ring').forEach((ring,i)=>{const q=((pt2*.56)+i/3)%1;ring.style.transform=`scale(${.65+q*6.2})`;ring.style.opacity=on*Math.pow(1-q,1.25)*.9});const c2=pu.el.querySelector('.core');c2.style.transform=`scale(${1+.28*Math.sin(pt2*5)})`;c2.style.opacity=on}
+  const edgeK=el=>{const r=el.getBoundingClientRect();if(r.width<1)return 0;const d=Math.min(r.left,r.top,innerWidth-r.right,innerHeight-r.bottom);return Math.max(0,Math.min(1,(d-16)/24))}; // 16px 安全区内全隐，与 qa-render 判据一致
+  for(const k in tags){const{el,root,loc,off,ev}=tags[k];const end=ev.end>ev.start?ev.end:DUR;const fin=fade(t,ev.start,ev.start+.35);placeEl(root,loc.coordinates,'center',off,(loc.ground||0)*TEX);el.style.opacity=Math.min(fin,1-fade(t,end-.4,end))*edgeK(el);el.style.transform='translateY('+((1-fin)*14)+'px) scale('+(0.82+0.18*fin+0.05*Math.sin(Math.min(1,fin*1.6)*Math.PI))+')'} // 入场回弹：0.82→1.0 主体缩放 + sin 半程上冲 5%（EP7 地图开场「标签长出来」判例；fade 窗 0.35s 内完成，终态静止不受影响
+  for(const k in calls){const{el,root,loc,ev}=calls[k];const end=ev.end>ev.start?ev.end:DUR;const fin=fade(t,ev.start,ev.start+.3);placeEl(root,loc.coordinates,'center',null,(loc.ground||0)*TEX);el.style.opacity=Math.min(fin,1-fade(t,end-.3,end))*edgeK(el.querySelector('.card'));el.querySelector('.lead').style.width=(112*fin)+'px'}
+  } // end if(!GLSYM)
+  const hud=document.querySelector('#hud');
+  if(st.kind==='route'&&st.ev.hud!==false){const s=SEGS[st.ev.segment];hud.querySelector('b').textContent=s.style.label;hud.querySelector('b').style.color=s.style.color;hud.querySelector('span').textContent=(s.endpoints&&s.endpoints.from&&s.endpoints.to)?s.endpoints.from+' → '+s.endpoints.to:'';hud.style.borderColor=s.style.color;hud.style.opacity=fade(t,st.ev.start,st.ev.start+.3)}
+  else if(st.kind==='summary'){hud.querySelector('b').textContent=st.ev.title||'全程总览';hud.querySelector('b').style.color='#f4df9b';hud.querySelector('span').textContent=st.ev.body||'';hud.style.borderColor='#f4df9b';hud.style.opacity=fade(t,st.ev.start,st.ev.start+.5)}
+  else hud.style.opacity=0;
+  legend.style.opacity=qnum('legend',1)?(firstRoute&&t>=firstRoute.start&&!inSummary?fade(t,firstRoute.start,firstRoute.start+.5):0):0;
+  if(C.storyboard.title){const out=Math.min(2.4,firstRoute?firstRoute.start:2.4);let op=fade(t,.3,1.1)*(1-fade(t,out,out+.5));const su=summaries.find(e=>t>=e.start&&t<=e.end);if(su)op=Math.max(op,fade(t,su.start,su.start+.6));if(C.storyboard.titleHold)op=fade(t,.3,1.0);titleEl.style.opacity=op} // 标题开场亮相+summary 期回亮常驻（EP7 判例：终态「一图」=封面级收藏锚，核心画面必须带标题）；titleHold=一图型 2D 攻略地图全程常驻
+};
+window.__qaOverlays=()=>{const out=[];const push=(kind,el,visEl)=>{const o=parseFloat(getComputedStyle(visEl||el).opacity||0);if(o>.05){const r=el.getBoundingClientRect();if(r.width>1&&r.height>1)out.push({kind,text:(el.textContent||'').slice(0,40),rect:{x:r.x,y:r.y,w:r.width,h:r.height},opacity:o})}};
+  push('title',titleEl);push('hud',document.querySelector('#hud'));for(const k in tags)push('tag',tags[k].el);for(const k in calls)push('card',calls[k].el.querySelector('.card'),calls[k].el);legend.querySelectorAll('.pill').forEach(e=>push('pill',e));return out};
+let timer;map.on('idle',()=>{clearTimeout(timer);timer=setTimeout(()=>window.__IDLE=true,100)});map.on('movestart',()=>window.__IDLE=false);map.on('error',e=>window.__ERR=(window.__ERR||'')+';'+(e.error?.message||e));
+})();
+</script></body></html>

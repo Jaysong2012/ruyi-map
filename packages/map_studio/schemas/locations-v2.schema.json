@@ -1,0 +1,64 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Map Studio locations v2",
+  "type": "object",
+  "required": [
+    "locations"
+  ],
+  "properties": {
+    "locations": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "coordinates"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "coordinates": {
+            "type": "array",
+            "minItems": 2,
+            "maxItems": 2,
+            "items": {
+              "type": "number"
+            }
+          },
+          "kind": {
+            "enum": [
+              "entry",
+              "exit",
+              "stay",
+              "spot",
+              "station",
+              "junction",
+              "service",
+              "gate",
+              "city"
+            ],
+            "description": "渲染器着色：entry 绿 / exit 蓝 / stay 红；其余中性（2026-09-12 对齐实现，旧 gate 保留兼容）"
+          },
+          "label": {
+            "type": "object"
+          },
+          "facts": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "ground": {
+            "type": "number",
+            "description": "地面海拔（编译期由 DEM 回填，手写可覆盖）"
+          }
+        }
+      }
+    }
+  }
+}

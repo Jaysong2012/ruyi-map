@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 2,
+  "name": "huangshan-route-proof",
+  "inputs": {"locations": "locations.json", "routes": "routes.json", "storyboard": "storyboard.json"},
+  "map": {
+    "bounds": [118.14, 30.06, 118.20, 30.16],
+    "center": [118.166, 30.13], "zoom": 11.9, "pitch": 54, "bearing": -10,
+    "terrainExaggeration": 2.15,
+    "sources": {
+      "satellite": {"tiles": "data/sat/{z}/{x}/{y}.jpg", "minzoom": 4, "maxzoom": 15},
+      "dem": {"tiles": "data/dem/{z}/{x}/{y}.png", "encoding": "terrarium", "minzoom": 4, "maxzoom": 12}
+    }
+  },
+  "output": {"directory": "output", "width": 1280, "height": 720, "fps": 30}
+}

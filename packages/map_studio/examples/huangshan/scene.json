@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "name": "huangshan-proof",
+  "bounds": [118.006, 30.043, 118.331, 30.200],
+  "sources": {
+    "dem": {"path": "data/dem.png", "format": "terrarium", "geoSidecar": "data/dem.geo.json"},
+    "texture": {"path": "data/texture.jpg", "format": "image", "geoSidecar": "data/texture.geo.json"},
+    "routes": "data/routes.geojson"
+  },
+  "look": {"preset": "verdant-cinematic"},
+  "shots": [
+    {"id": "hero", "kind": "still", "cameraPreset": "ridge-reveal"},
+    {"id": "overview", "kind": "still", "cameraPreset": "terrain-overview"},
+    {"id": "route", "kind": "still", "cameraPreset": "route-overview"}
+  ],
+  "output": {"directory": "output", "width": 1920, "height": 1080, "terrainGridMax": 1536}
+}

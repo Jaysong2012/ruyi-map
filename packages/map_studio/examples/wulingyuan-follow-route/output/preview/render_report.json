@@ -1,0 +1,30 @@
+{
+  "url": "http://127.0.0.1:59881",
+  "width": 1280,
+  "height": 720,
+  "fps": 30,
+  "duration": 17,
+  "frames": 1,
+  "errors": "",
+  "idleTimeouts": [],
+  "overlays": [
+    {
+      "t": 16.2,
+      "items": [
+        {
+          "kind": "pill",
+          "text": "环保车",
+          "rect": {
+            "x": 54,
+            "y": 631,
+            "w": 115,
+            "h": 45
+          },
+          "opacity": 0.55
+        }
+      ]
+    }
+  ],
+  "crashes": [],
+  "relaunches": 0
+}

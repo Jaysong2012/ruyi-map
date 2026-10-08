@@ -1,0 +1,29 @@
+{
+  "durationSeconds": 24,
+  "title": "黄山两天一夜",
+  "subtitle": "后山上 · 住山上 · 前山下",
+  "events": [
+    {"type":"camera","start":0,"end":2.5,"camera":{"mode":"overview"}},
+    {"type":"route","start":0.2,"end":2.7,"segment":"bus-in"},
+    {"type":"marker","start":0.4,"end":2.2,"location":"tangkou","offset":[0,-28]},
+    {"type":"route","start":2.7,"end":5.2,"segment":"cable-up"},
+    {"type":"marker","start":2.9,"end":4.6,"location":"yungusi","offset":[68,12]},
+    {"type":"route","start":5.2,"end":11.2,"segment":"day1-walk-a"},
+    {"type":"marker","start":5.6,"end":9.0,"location":"shixin","offset":[70,-64]},
+    {"type":"marker","start":7.0,"end":9.6,"location":"beihai","offset":[80,-30]},
+    {"type":"callout","start":8.0,"end":11.0,"location":"paiyun","title":"西海大峡谷","body":"体力够再下谷，至少预留 3 小时"},
+    {"type":"route","start":11.2,"end":13.2,"segment":"xihai-rail"},
+    {"type":"route","start":13.2,"end":14.6,"segment":"day1-walk-b"},
+    {"type":"marker","start":13.4,"end":16.4,"location":"guangming","title":"光明顶 · 住一晚","offset":[-18,-88]},
+    {"type":"hold","start":14.6,"end":16.4,"location":"guangming"},
+    {"type":"callout","start":14.9,"end":16.2,"location":"guangming","title":"光明顶","body":"住在山上，第二天少走回头路"},
+    {"type":"route","start":16.4,"end":21.6,"segment":"day2-walk"},
+    {"type":"marker","start":17.0,"end":19.0,"location":"aoyu","offset":[80,36]},
+    {"type":"marker","start":19.2,"end":20.6,"location":"baibu","offset":[70,20]},
+    {"type":"marker","start":20.4,"end":22.6,"location":"yuping","title":"迎客松 · 前山下","offset":[90,54]},
+    {"type":"callout","start":20.6,"end":22.3,"location":"yuping","title":"迎客松","body":"看完从玉屏索道下山"},
+    {"type":"route","start":21.6,"end":22.8,"segment":"cable-down"},
+    {"type":"marker","start":22.2,"end":24,"location":"ciguangge","offset":[0,34]},
+    {"type":"summary","start":22.8,"end":24,"title":"后山上 · 山上住 · 前山下","body":"两天一夜完整闭环"}
+  ]
+}

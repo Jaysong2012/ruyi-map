@@ -1,0 +1,23 @@
+# python
+__pycache__/
+*.pyc
+*.egg-info/
+.venv/
+build/
+dist/
+
+# node
+node_modules/
+
+# 渲染产物与数据缓存（重建命令见各 example README；黄金基线 compiled.json/render_report 入库）
+.work/
+*.mp4
+*.mov
+frames/
+frames_*/
+examples/*/data/
+packages/map_studio/examples/*/data/
+
+# 本机
+.DS_Store
+*.log

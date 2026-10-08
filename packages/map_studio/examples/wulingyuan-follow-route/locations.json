@@ -1,0 +1,22 @@
+{
+  "locations": [
+    {
+      "id": "biaozhimen",
+      "name": "标志门（东门）",
+      "coordinates": [
+        110.542,
+        29.3511
+      ],
+      "kind": "entry"
+    },
+    {
+      "id": "bailong",
+      "name": "百龙天梯",
+      "coordinates": [
+        110.4625,
+        29.3531
+      ],
+      "kind": "station"
+    }
+  ]
+}

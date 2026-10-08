@@ -1,0 +1,361 @@
+{
+  "build": {
+    "contractSha256": "522572108825ee665415539f0bf257aa3cb93a67a784ccb44dbea8486946a2c3",
+    "inputs": {
+      "locations": "locations.json",
+      "routes": "routes.json",
+      "storyboard": "storyboard.json"
+    }
+  },
+  "locations": [
+    {
+      "coordinates": [
+        103.9136,
+        33.2556
+      ],
+      "id": "goukou",
+      "kind": "entry",
+      "name": "沟口 · 景区入口"
+    },
+    {
+      "coordinates": [
+        103.9103,
+        33.2786
+      ],
+      "id": "shuzheng",
+      "kind": "spot",
+      "name": "树正群海"
+    },
+    {
+      "coordinates": [
+        103.9086,
+        33.305
+      ],
+      "id": "nuorilang",
+      "kind": "station",
+      "name": "诺日朗换乘站"
+    },
+    {
+      "coordinates": [
+        103.8936,
+        33.3594
+      ],
+      "id": "wuhuahai",
+      "kind": "spot",
+      "name": "五花海"
+    },
+    {
+      "coordinates": [
+        103.8985,
+        33.348
+      ],
+      "id": "zhenzhutan",
+      "kind": "spot",
+      "name": "珍珠滩"
+    },
+    {
+      "coordinates": [
+        103.9281,
+        33.3836
+      ],
+      "id": "changhai",
+      "kind": "spot",
+      "name": "长海"
+    },
+    {
+      "coordinates": [
+        103.9242,
+        33.3778
+      ],
+      "id": "wucaichi",
+      "kind": "exit",
+      "name": "五彩池"
+    }
+  ],
+  "map": {
+    "attribution": "© Esri World Imagery · MapLibre · 路线示意",
+    "bearing": -8,
+    "bounds": [
+      103.86,
+      33.22,
+      103.96,
+      33.42
+    ],
+    "center": [
+      103.911,
+      33.318
+    ],
+    "pitch": 52,
+    "sources": {
+      "dem": {
+        "encoding": "terrarium",
+        "maxzoom": 12,
+        "minzoom": 4,
+        "tiles": "data/dem/{z}/{x}/{y}.png"
+      },
+      "satellite": {
+        "maxzoom": 14,
+        "minzoom": 4,
+        "tiles": "data/sat/{z}/{x}/{y}.jpg"
+      }
+    },
+    "terrainExaggeration": 1.8,
+    "zoom": 11.4
+  },
+  "name": "jiuzhaigou-route-proof",
+  "output": {
+    "directory": "output",
+    "fps": 30,
+    "height": 720,
+    "width": 1280
+  },
+  "schemaVersion": 2,
+  "segments": [
+    {
+      "coordinates": [
+        [
+          103.9136,
+          33.2556
+        ],
+        [
+          103.9103,
+          33.2786
+        ],
+        [
+          103.9086,
+          33.305
+        ]
+      ],
+      "endpoints": {
+        "from": "沟口 · 景区入口",
+        "to": "诺日朗换乘站"
+      },
+      "id": "bus-main",
+      "mode": "bus",
+      "style": {
+        "color": "#ff9f43",
+        "dash": false,
+        "label": "观光车"
+      }
+    },
+    {
+      "coordinates": [
+        [
+          103.9086,
+          33.305
+        ],
+        [
+          103.901,
+          33.332
+        ],
+        [
+          103.8936,
+          33.3594
+        ]
+      ],
+      "endpoints": {
+        "from": "诺日朗换乘站",
+        "to": "五花海"
+      },
+      "id": "bus-rize",
+      "mode": "bus",
+      "style": {
+        "color": "#ff9f43",
+        "dash": false,
+        "label": "日则沟观光车"
+      }
+    },
+    {
+      "coordinates": [
+        [
+          103.8936,
+          33.3594
+        ],
+        [
+          103.896,
+          33.355
+        ],
+        [
+          103.8985,
+          33.348
+        ]
+      ],
+      "endpoints": {
+        "from": "五花海",
+        "to": "珍珠滩"
+      },
+      "id": "walk-wuhua",
+      "mode": "walk",
+      "style": {
+        "color": "#44e3a1",
+        "dash": false,
+        "label": "步行"
+      }
+    },
+    {
+      "coordinates": [
+        [
+          103.9086,
+          33.305
+        ],
+        [
+          103.918,
+          33.345
+        ],
+        [
+          103.9281,
+          33.3836
+        ]
+      ],
+      "endpoints": {
+        "from": "诺日朗换乘站",
+        "to": "长海"
+      },
+      "id": "bus-zecha",
+      "mode": "bus",
+      "style": {
+        "color": "#ff9f43",
+        "dash": false,
+        "label": "则查洼沟观光车"
+      }
+    },
+    {
+      "coordinates": [
+        [
+          103.9281,
+          33.3836
+        ],
+        [
+          103.9242,
+          33.3778
+        ]
+      ],
+      "endpoints": {
+        "from": "长海",
+        "to": "五彩池"
+      },
+      "id": "walk-changhai",
+      "mode": "walk",
+      "style": {
+        "color": "#44e3a1",
+        "dash": false,
+        "label": "步行"
+      }
+    }
+  ],
+  "storyboard": {
+    "durationSeconds": 18.0,
+    "events": [
+      {
+        "camera": {
+          "mode": "overview"
+        },
+        "end": 2,
+        "start": 0,
+        "type": "camera"
+      },
+      {
+        "end": 3.5,
+        "segment": "bus-main",
+        "start": 0.2,
+        "type": "route"
+      },
+      {
+        "end": 2.2,
+        "location": "goukou",
+        "offset": [
+          0,
+          -28
+        ],
+        "start": 0.4,
+        "type": "marker"
+      },
+      {
+        "end": 3.6,
+        "location": "shuzheng",
+        "offset": [
+          70,
+          -30
+        ],
+        "start": 2.2,
+        "type": "marker"
+      },
+      {
+        "end": 6.5,
+        "segment": "bus-rize",
+        "start": 3.5,
+        "type": "route"
+      },
+      {
+        "end": 5.0,
+        "location": "nuorilang",
+        "offset": [
+          -90,
+          10
+        ],
+        "start": 3.7,
+        "type": "marker"
+      },
+      {
+        "end": 9.5,
+        "segment": "walk-wuhua",
+        "start": 6.5,
+        "type": "route"
+      },
+      {
+        "body": "上午顺光，钙华彩池颜色最透",
+        "end": 9.4,
+        "location": "wuhuahai",
+        "start": 6.8,
+        "title": "五花海",
+        "type": "callout"
+      },
+      {
+        "end": 11,
+        "location": "wuhuahai",
+        "start": 9.5,
+        "type": "hold"
+      },
+      {
+        "end": 14,
+        "segment": "bus-zecha",
+        "start": 11,
+        "type": "route"
+      },
+      {
+        "end": 16,
+        "segment": "walk-changhai",
+        "start": 14,
+        "type": "route"
+      },
+      {
+        "end": 15.6,
+        "location": "changhai",
+        "offset": [
+          70,
+          -40
+        ],
+        "start": 14.2,
+        "type": "marker"
+      },
+      {
+        "end": 17,
+        "location": "wucaichi",
+        "offset": [
+          60,
+          30
+        ],
+        "start": 15.4,
+        "type": "marker"
+      },
+      {
+        "end": 18,
+        "start": 16,
+        "title": "Y 字三沟 · 观光车 + 步行",
+        "type": "summary"
+      }
+    ],
+    "subtitle": "Y 字三沟 · 观光车 + 步行",
+    "title": "九寨沟一日"
+  }
+}

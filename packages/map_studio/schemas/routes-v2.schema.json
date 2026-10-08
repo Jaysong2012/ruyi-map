@@ -1,0 +1,96 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Map Studio routes v2",
+  "type": "object",
+  "required": [
+    "segments"
+  ],
+  "properties": {
+    "segments": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "mode"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "mode": {
+            "enum": [
+              "walk",
+              "bus",
+              "cable",
+              "rail",
+              "boat",
+              "drive"
+            ]
+          },
+          "locations": {
+            "type": "array",
+            "minItems": 2,
+            "items": {
+              "type": "string"
+            }
+          },
+          "coordinates": {
+            "type": "array",
+            "minItems": 2
+          },
+          "maximumGapMeters": {
+            "type": "number",
+            "minimum": 1
+          },
+          "style": {
+            "type": "object",
+            "properties": {
+              "color": {
+                "type": "string"
+              },
+              "label": {
+                "type": "string"
+              },
+              "dash": {
+                "type": [
+                  "boolean",
+                  "array"
+                ]
+              },
+              "width": {
+                "type": "number",
+                "minimum": 0
+              }
+            },
+            "additionalProperties": true
+          },
+          "agl": {
+            "type": "number",
+            "minimum": 0,
+            "description": "跟拍相机离地高度（米）"
+          },
+          "traveler": {
+            "type": "string",
+            "description": "行进载具图标 id（bus/cable/elevator/hike…）"
+          },
+          "title": {
+            "type": "string"
+          },
+          "endpoints": {
+            "type": "object",
+            "properties": {
+              "from": {
+                "type": "string"
+              },
+              "to": {
+                "type": "string"
+              }
+            },
+            "description": "起止地名（文档用；渲染器不读，编译器按 ≤250m 最近 location 重算）"
+          }
+        }
+      }
+    }
+  }
+}

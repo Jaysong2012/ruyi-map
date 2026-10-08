@@ -1,0 +1,121 @@
+{
+ "locations": [
+  {
+   "id": "tangkou",
+   "name": "汤口换乘中心",
+   "coordinates": [
+    118.1798,
+    30.0718
+   ],
+   "kind": "entry"
+  },
+  {
+   "id": "yungusi",
+   "name": "云谷寺 · 后山入口",
+   "coordinates": [
+    118.187548,
+    30.122209
+   ],
+   "kind": "entry"
+  },
+  {
+   "id": "baieling",
+   "name": "白鹅岭",
+   "coordinates": [
+    118.167619,
+    30.139509
+   ],
+   "kind": "station"
+  },
+  {
+   "id": "shixin",
+   "name": "始信峰",
+   "coordinates": [
+    118.168,
+    30.1428
+   ],
+   "kind": "spot"
+  },
+  {
+   "id": "beihai",
+   "name": "北海",
+   "coordinates": [
+    118.164,
+    30.1455
+   ],
+   "kind": "spot"
+  },
+  {
+   "id": "paiyun",
+   "name": "西海大峡谷",
+   "coordinates": [
+    118.153581,
+    30.142128
+   ],
+   "kind": "spot"
+  },
+  {
+   "id": "xihai",
+   "name": "西海地轨下站",
+   "coordinates": [
+    118.150663,
+    30.134188
+   ],
+   "kind": "station"
+  },
+  {
+   "id": "tianhai",
+   "name": "天海",
+   "coordinates": [
+    118.162648,
+    30.131793
+   ],
+   "kind": "station"
+  },
+  {
+   "id": "guangming",
+   "name": "光明顶",
+   "coordinates": [
+    118.1595,
+    30.1325
+   ],
+   "kind": "stay"
+  },
+  {
+   "id": "aoyu",
+   "name": "鳌鱼峰",
+   "coordinates": [
+    118.16293,
+    30.129121
+   ],
+   "kind": "spot"
+  },
+  {
+   "id": "baibu",
+   "name": "百步云梯",
+   "coordinates": [
+    118.166,
+    30.127
+   ],
+   "kind": "spot"
+  },
+  {
+   "id": "yuping",
+   "name": "迎客松",
+   "coordinates": [
+    118.170351,
+    30.124591
+   ],
+   "kind": "spot"
+  },
+  {
+   "id": "ciguangge",
+   "name": "慈光阁 · 前山出口",
+   "coordinates": [
+    118.167465,
+    30.107794
+   ],
+   "kind": "exit"
+  }
+ ]
+}

@@ -1,0 +1,134 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Map Studio route project v2",
+  "type": "object",
+  "required": [
+    "schemaVersion",
+    "name",
+    "inputs",
+    "map",
+    "output"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "const": 2
+    },
+    "name": {
+      "type": "string",
+      "minLength": 1
+    },
+    "inputs": {
+      "type": "object",
+      "required": [
+        "locations",
+        "routes",
+        "storyboard"
+      ],
+      "properties": {
+        "locations": {
+          "type": "string"
+        },
+        "routes": {
+          "type": "string"
+        },
+        "storyboard": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false
+    },
+    "map": {
+      "type": "object",
+      "required": [
+        "bounds",
+        "center",
+        "zoom",
+        "pitch",
+        "bearing",
+        "sources"
+      ],
+      "properties": {
+        "bounds": {
+          "type": "array",
+          "minItems": 4,
+          "maxItems": 4,
+          "items": {
+            "type": "number"
+          }
+        },
+        "center": {
+          "type": "array",
+          "minItems": 2,
+          "maxItems": 2,
+          "items": {
+            "type": "number"
+          }
+        },
+        "zoom": {
+          "type": "number"
+        },
+        "pitch": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 85
+        },
+        "bearing": {
+          "type": "number"
+        },
+        "terrainExaggeration": {
+          "type": "number",
+          "minimum": 0
+        },
+        "sources": {
+          "type": "object"
+        },
+        "lockCamera": {
+          "type": "object",
+          "description": "锁机位（总览类镜头）：center/zoom/pitch/bearing",
+          "additionalProperties": true
+        },
+        "grade": {
+          "type": "object",
+          "description": "底图调色 routelayer/sat/con/vig/warm/retain…",
+          "additionalProperties": true
+        },
+        "waterStyle": {
+          "type": "object",
+          "description": "水面提亮层样式（sources.water 配套）：color/opacity/sheen",
+          "additionalProperties": true
+        },
+        "buildingStyle": {
+          "type": "object",
+          "description": "楼宇层样式（sources.buildings 配套）：landmarkColor/landmarkHeightX（Feature properties.lm 地标识别）",
+          "additionalProperties": true
+        }
+      }
+    },
+    "output": {
+      "type": "object",
+      "required": [
+        "directory",
+        "width",
+        "height",
+        "fps"
+      ],
+      "properties": {
+        "directory": {
+          "type": "string"
+        },
+        "width": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "height": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "fps": {
+          "type": "integer",
+          "minimum": 1
+        }
+      }
+    }
+  }
+}

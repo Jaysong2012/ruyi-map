@@ -1,0 +1,26 @@
+{
+  "schemaVersion": 1,
+  "name": "noir-gold",
+  "scope": "route_renderer.html（MapLibre 管线）城市故事片暗调叙事预设；与 green-lush-mountains（攻略自然）/urban-bright（攻略城市）并列第三预设",
+  "status": "待主人目检（2026-09-16 南京城墙 hero 样片呈审）",
+  "description": "暗调叙事预设「金陵」：城市成因学/历史题材专用——城市压暗，只有地理要素和叙事金线发光。route style.glow:true 开光晕打底（line-blur 6，alpha×0.6），金线即主角。用法：grade/waterStyle 并入 project.json 的 map，routes 段 style 加 glow:true。",
+  "grade": {
+    "sat": -0.15, "con": 0.16, "bmax": 0.62, "bmin": 0.0,
+    "vig": 0.4, "warm": 0.28,
+    "hsx": 0.65,
+    "hz": 0.12, "hzc": "#d9e2ea",
+    "sunAz": 95, "sunAnchor": "map",
+    "retain": 0.95,
+    "cf": "saturate(1.02) contrast(1.12) brightness(0.78)"
+  },
+  "waterStyle": {"color": "#4fa095", "opacity": 0.5, "sheen": 0.05},
+  "routeStyle": {"color": "#ffcf3e", "width": 9, "glow": true, "traveler": false},
+  "rationale": {
+    "暗底": "bmax 0.62+cf brightness 0.78 把卫星城市压成夜景底，观众注意力只剩发光要素——叙事型地图的第一步是「删掉城市」",
+    "金线": "glow 光晕打底（line-blur）+亮金 #ffcf3e：暗调场景 dark edge 描边语义不适用（描边是亮底分离用的），发光才是暗底分离",
+    "retain": "0.95：叙事片的已走路线=已讲完的论证，不许淡到断线（攻略 .42 语义在此不成立）",
+    "sun": "sunAz 95 晨光从东来+hsx 0.65 强浮雕：山体是叙事要素要第一个被看见",
+    "traveler": "false：线是被「画」出来的论证，不是被「走」出来的行程——无车无人无 HUD 无图例"
+  },
+  "evidence": "projects/practical-guides/travel-guides/ep04-nanjing/map-jinling-hero（《南京城墙为什么不是方的》hero 样片，2026-09-16）"
+}

@@ -1,0 +1,75 @@
+{
+ "durationSeconds": 17.0,
+ "title": "D2 山上日 · 跟拍小样",
+ "subtitle": "标志门 → 百龙天梯 13.3km 盘山",
+ "events": [
+  {
+   "type": "camera",
+   "start": 0.0,
+   "end": 1.5,
+   "camera": {
+    "from": {
+     "center": [
+      110.5545,
+      29.3435
+     ],
+     "zoom": 12.1,
+     "pitch": 46,
+     "bearing": -60
+    },
+    "to": {
+     "center": [
+      110.5493,
+      29.3478
+     ],
+     "zoom": 13.0,
+     "pitch": 54,
+     "bearing": -60
+    }
+   }
+  },
+  {
+   "type": "route",
+   "start": 1.5,
+   "end": 13.5,
+   "segment": "bus-elevator",
+   "blendSec": 0.5,
+   "camera": {
+    "follow": true,
+    "pitch": 60,
+    "agl": 11000,
+    "trail": 0.06,
+    "tangentWin": 0.4
+   }
+  },
+  {
+   "type": "marker",
+   "start": 2.2,
+   "end": 5.5,
+   "location": "biaozhimen",
+   "title": "7:30 第一批进标志门",
+   "offset": [
+    40,
+    46
+   ]
+  },
+  {
+   "type": "hold",
+   "start": 13.5,
+   "end": 17.0,
+   "location": "bailong",
+   "agl": 4800,
+   "bearing": -60,
+   "blendSec": 2.2
+  },
+  {
+   "type": "callout",
+   "start": 13.8,
+   "end": 17.0,
+   "location": "bailong",
+   "title": "百龙天梯",
+   "body": "约 65 元 · 2 分钟到山顶",
+   "leader": true
+  }
+ ]
+}

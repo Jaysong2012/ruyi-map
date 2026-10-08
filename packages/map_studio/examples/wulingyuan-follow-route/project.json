@@ -1,0 +1,44 @@
+{
+  "schemaVersion": 2,
+  "name": "wulingyuan-follow-route-example",
+  "inputs": {
+    "locations": "locations.json",
+    "routes": "routes.json",
+    "storyboard": "storyboard.json"
+  },
+  "map": {
+    "bounds": [
+      110.38,
+      29.29,
+      110.58,
+      29.46
+    ],
+    "center": [
+      110.48,
+      29.375
+    ],
+    "zoom": 11.3,
+    "pitch": 50,
+    "bearing": -8,
+    "terrainExaggeration": 1.5,
+    "sources": {
+      "satellite": {
+        "tiles": "data/sat/{z}/{x}/{y}.jpg",
+        "minzoom": 9,
+        "maxzoom": 15
+      },
+      "dem": {
+        "tiles": "data/dem/{z}/{x}/{y}.png",
+        "encoding": "terrarium",
+        "minzoom": 9,
+        "maxzoom": 13
+      }
+    }
+  },
+  "output": {
+    "directory": "output",
+    "width": 1280,
+    "height": 720,
+    "fps": 30
+  }
+}

@@ -1,0 +1,162 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Map Studio storyboard v2",
+  "type": "object",
+  "required": [
+    "durationSeconds",
+    "events"
+  ],
+  "properties": {
+    "durationSeconds": {
+      "type": "number",
+      "exclusiveMinimum": 0
+    },
+    "events": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "type",
+          "start"
+        ],
+        "properties": {
+          "type": {
+            "enum": [
+              "route",
+              "camera",
+              "callout",
+              "marker",
+              "hold",
+              "summary",
+              "panel"
+            ]
+          },
+          "start": {
+            "type": "number",
+            "minimum": 0
+          },
+          "end": {
+            "type": "number",
+            "minimum": 0
+          },
+          "segment": {
+            "type": "string"
+          },
+          "location": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "body": {
+            "type": "string"
+          },
+          "camera": {
+            "type": "object",
+            "properties": {
+              "follow": {
+                "type": "boolean"
+              },
+              "pitch": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 85
+              },
+              "agl": {
+                "type": "number",
+                "minimum": 0
+              },
+              "trail": {
+                "type": "number"
+              },
+              "tangentWin": {
+                "type": "number",
+                "minimum": 0
+              },
+              "lookAhead": {
+                "type": "number"
+              },
+              "from": {
+                "type": "object"
+              },
+              "to": {
+                "type": "object"
+              },
+              "center": {
+                "type": "array",
+                "items": {
+                  "type": "number"
+                }
+              },
+              "zoom": {
+                "type": "number"
+              },
+              "bearing": {
+                "type": "number"
+              }
+            },
+            "additionalProperties": true
+          },
+          "leader": {
+            "type": "boolean",
+            "description": "marker/callout：标签底边烘焙引线+端点钉指向锚点（GL 投影不飘）；与自定义 offset 互斥"
+          },
+          "offset": {
+            "type": "array",
+            "items": {
+              "type": "number"
+            },
+            "description": "icon-offset 像素（乘 icon-size）；不给时用默认，leader=true 时忽略"
+          },
+          "blendSec": {
+            "type": "number",
+            "minimum": 0,
+            "description": "与前一事件相机混合秒数（U 型折返衔接 2.2 判例）"
+          },
+          "hud": {
+            "type": "boolean",
+            "description": "route：false 关闭底部路线 HUD（无字净版）"
+          },
+          "agl": {
+            "type": "number",
+            "minimum": 0
+          },
+          "pitch": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 85
+          },
+          "bearing": {
+            "type": "number"
+          },
+          "kind": {
+            "type": "string",
+            "description": "marker 类型/着色"
+          },
+          "side": {
+            "enum": [
+              "left",
+              "right",
+              "top",
+              "bottom"
+            ],
+            "description": "callout 相对锚点的方向"
+          },
+          "alsoShow": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1
+            },
+            "description": "summary：其他段 id → alpha"
+          },
+          "label": {
+            "type": "string"
+          }
+        },
+        "additionalProperties": true
+      }
+    }
+  }
+}

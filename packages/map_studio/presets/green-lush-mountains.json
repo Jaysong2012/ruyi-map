@@ -1,0 +1,30 @@
+{
+  "schemaVersion": 1,
+  "name": "green-lush-mountains",
+  "scope": "route_renderer.html（MapLibre 跟拍管线）；与 verdant-cinematic（Blender 管线）无关",
+  "description": "青山绿水预设（2026-09-16 主人定型）：旅游攻略地图=贩卖向往，亮调通透青绿；暗调电影感（黄山判例方向）降级为特殊题材可选。用法：grade 块原样并入 project.json 的 map.grade；hold 事件按需加 creep（建议到达拍 .025）。",
+  "grade": {
+    "sat": 0.1, "con": 0.06, "bmax": 1.0, "bmin": 0.03,
+    "vig": 0.16, "warm": 0.15,
+    "hz": 0.3, "hzc": "#e6f3ee",
+    "sunAz": 300, "sunAnchor": "map",
+    "cfAlt": 1,
+    "cfhue0": 6, "cfhue1": 18,
+    "cfsat0": 1.18, "cfsat1": 1.5,
+    "cfz0": 11.2, "cfz1": 12.8,
+    "cfcon": 1.04, "cfbri": 1.06
+  },
+  "hold": {"creep": 0.025},
+  "rationale": {
+    "cfAlt": "海拔自适应调色（主人「前5秒怪」判例）：高空（zoom≤cfz0）荒凉山体全局染绿=假；低空（≥cfz1）谷底真植被染绿=还原夏天。hue/sat 随 zoom 连续 ease 插值，物理依据=高空看穿更厚大气色彩灰淡",
+    "hueCeiling": "cfhue1 ≤18°：hue-rotate 全局转色连路线一起转，25° 时路线黄化贴地判死；18° 是山体够青与路线保橙的临界点",
+    "sunAnchor": "map=太阳钉地球，跟拍过弯坡面明暗不随相机转（viewport 会转=假）",
+    "hz": "大气 veil（setSky 在 v4.7.1 mercator+terrain 判死后的唯一正解）：青白色远距霾，远山层次后退治沙盘感",
+    "creep": "hold 段单调 zoom 缓推（zoom/秒）：3 秒拉近 ~20% 让地形视差活着；与「hold 禁 zoom 呼吸」边界=单调非振荡"
+  },
+  "sideEffects": [
+    "hue-rotate 全局转色：GL 烘焙金色元素（callout 标题/光圈）偏移约 +18° 成黄绿；DOM 层（HUD/图例）不受影响。要纯金需烘焙色反向补偿（未做，主人目检黄绿在青山上和谐后接受）",
+    "荒凉高海拔地貌（雪线/岩石/稀草甸）在低空特写时仍会被染绿——选址勘帧时注意，必要时该镜头 cfhue1 降档"
+  ],
+  "evidence": "projects/practical-guides/travel-guides/ep06-west-sichuan/map-main/output/realism-samples/sample-H-greenalt.mp4（2026-09-16 主人目检通过「沉淀吧」）"
+}

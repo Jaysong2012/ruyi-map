@@ -1,0 +1,23 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "ruyi-map"
+version = "0.1.0"
+description = "视频级地图镜头生产线：2D 地理事件 / 3D 攻略路线 / 地形沙盘 / 程序场景 / 时刻表攻略地图"
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "MIT" }
+dependencies = [
+    "numpy>=1.26",
+    "Pillow>=10",
+    "jsonschema>=4.20",
+]
+
+[project.scripts]
+ruyi-map = "ruyi_map.cli:main"
+
+[tool.setuptools]
+package-dir = { "" = "packages" }
+packages = ["ruyi_map"]

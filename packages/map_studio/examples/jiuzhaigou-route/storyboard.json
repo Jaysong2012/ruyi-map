@@ -1,0 +1,21 @@
+{
+  "durationSeconds": 18,
+  "title": "九寨沟一日",
+  "subtitle": "Y 字三沟 · 观光车 + 步行",
+  "events": [
+    {"type":"camera","start":0,"end":2,"camera":{"mode":"overview"}},
+    {"type":"route","start":0.2,"end":3.5,"segment":"bus-main"},
+    {"type":"marker","start":0.4,"end":2.2,"location":"goukou","offset":[0,-28]},
+    {"type":"marker","start":2.2,"end":3.6,"location":"shuzheng","offset":[70,-30]},
+    {"type":"route","start":3.5,"end":6.5,"segment":"bus-rize"},
+    {"type":"marker","start":3.7,"end":5.0,"location":"nuorilang","offset":[-90,10]},
+    {"type":"route","start":6.5,"end":9.5,"segment":"walk-wuhua"},
+    {"type":"callout","start":6.8,"end":9.4,"location":"wuhuahai","title":"五花海","body":"上午顺光，钙华彩池颜色最透"},
+    {"type":"hold","start":9.5,"end":11,"location":"wuhuahai"},
+    {"type":"route","start":11,"end":14,"segment":"bus-zecha"},
+    {"type":"route","start":14,"end":16,"segment":"walk-changhai"},
+    {"type":"marker","start":14.2,"end":15.6,"location":"changhai","offset":[70,-40]},
+    {"type":"marker","start":15.4,"end":17,"location":"wucaichi","offset":[60,30]},
+    {"type":"summary","start":16,"end":18,"title":"Y 字三沟 · 观光车 + 步行"}
+  ]
+}

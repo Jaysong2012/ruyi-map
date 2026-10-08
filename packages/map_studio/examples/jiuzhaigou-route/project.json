@@ -1,0 +1,16 @@
+{
+  "schemaVersion": 2,
+  "name": "jiuzhaigou-route-proof",
+  "inputs": {"locations": "locations.json", "routes": "routes.json", "storyboard": "storyboard.json"},
+  "map": {
+    "bounds": [103.86, 33.22, 103.96, 33.42],
+    "center": [103.911, 33.318], "zoom": 11.4, "pitch": 52, "bearing": -8,
+    "terrainExaggeration": 1.8,
+    "attribution": "© Esri World Imagery · MapLibre · 路线示意",
+    "sources": {
+      "satellite": {"tiles": "data/sat/{z}/{x}/{y}.jpg", "minzoom": 4, "maxzoom": 14},
+      "dem": {"tiles": "data/dem/{z}/{x}/{y}.png", "encoding": "terrarium", "minzoom": 4, "maxzoom": 12}
+    }
+  },
+  "output": {"directory": "output", "width": 1280, "height": 720, "fps": 30}
+}
