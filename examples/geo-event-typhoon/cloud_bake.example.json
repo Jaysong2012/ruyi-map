@@ -1,0 +1,17 @@
+{
+  "src": ".work/gibs/source.jpg",
+  "src_window": [
+    99.0,
+    9.0,
+    139.5,
+    40.5
+  ],
+  "target_geo": ".work/map.geo.json",
+  "out": ".work/cloud_0000.png",
+  "mask": {
+    "lo": 90,
+    "hi": 200,
+    "blur": 6
+  },
+  "half": true
+}

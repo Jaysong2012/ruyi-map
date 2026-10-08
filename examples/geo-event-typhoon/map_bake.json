@@ -1,0 +1,37 @@
+{
+  "out": ".work/map.png",
+  "geo_out": ".work/map.geo.json",
+  "window": [
+    105,
+    15,
+    130,
+    35
+  ],
+  "zoom": 6,
+  "base": {
+    "provider": "xyz",
+    "style": "satellite"
+  },
+  "borders": [
+    {
+      "src": "datav:100000_full",
+      "color": [
+        255,
+        255,
+        255,
+        105
+      ],
+      "width": 3
+    },
+    {
+      "src": "datav:100000",
+      "color": [
+        255,
+        255,
+        255,
+        155
+      ],
+      "width": 5
+    }
+  ]
+}

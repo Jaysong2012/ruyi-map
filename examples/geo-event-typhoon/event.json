@@ -1,0 +1,29 @@
+{
+  "title": "热点事件标题",
+  "factCutoff": "YYYY-MM-DD",
+  "durationSeconds": 60,
+  "fps": 30,
+  "canvas": {"rough": [1280, 720], "final": [3840, 2160]},
+  "map": {
+    "image": ".work/map.png",
+    "geoSidecar": ".work/map.geo.json",
+    "appearance": {"minMeanLuma": 48, "minLitPixelRatio": 0.35}
+  },
+  "layers": [],
+  "theme": {"route": "#FFD370", "live": "#4CE7CA", "forecast": "#A0AEBE"},
+  "labels": [
+    {"lon": 113.3, "lat": 23.1, "text": "广东"},
+    {"lon": 118.2, "lat": 26.1, "text": "福建"}
+  ],
+  "camera": [
+    {"at": 0, "west": 105, "south": 15, "east": 130, "north": 35},
+    {"at": 60, "west": 105, "south": 15, "east": 130, "north": 35}
+  ],
+  "track": [
+    {"at": 0, "time": "DATE TIME", "lon": 120, "lat": 25, "status": "start"},
+    {"at": 60, "time": "DATE TIME", "lon": 115, "lat": 24, "status": "end", "kind": "observed"}
+  ],
+  "events": [
+    {"at": 0, "end": 4.5, "time": "DATE · TIME", "place": "地点", "label": "关键事件", "color": "#FFD370"}
+  ]
+}

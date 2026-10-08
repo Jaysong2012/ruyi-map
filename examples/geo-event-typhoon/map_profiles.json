@@ -1,0 +1,35 @@
+{
+  "satellite": {
+    "provider": "xyz",
+    "style": "satellite",
+    "credit": "Esri World Imagery",
+    "useFor": "台风、洪水、山火、地貌变化及需要真实地表证据的事件"
+  },
+  "vector": {
+    "provider": "xyz",
+    "style": "vector",
+    "credit": "OpenStreetMap contributors",
+    "useFor": "城市交通、跨区域路线、地点关系和高密度中文标注"
+  },
+  "terrain": {
+    "provider": "xyz",
+    "style": "terrain",
+    "credit": "OpenTopoMap contributors",
+    "useFor": "地震、滑坡、山火、救援和地形因果"
+  },
+  "dark": {
+    "provider": "xyz",
+    "style": "dark",
+    "credit": "CARTO / OpenStreetMap contributors",
+    "useFor": "仅在主人明确要求暗色视觉时使用；仍须通过地图亮度闸门，禁止近黑海陆与全画幅暗罩"
+  },
+  "gibs": {
+    "provider": "gibs",
+    "layer": "BlueMarble_NextGeneration",
+    "time": "default",
+    "tilematrixset": "250m",
+    "format": "image/jpeg",
+    "credit": "NASA GIBS",
+    "useFor": "全球尺度天气、海洋与环境事件；动态云层另走 cloud_bake.py"
+  }
+}

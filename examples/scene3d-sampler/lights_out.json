@@ -1,0 +1,18 @@
+{
+  "out": ".work/lights_out.mp4",
+  "canvas": [
+    1920,
+    1080
+  ],
+  "fps": 60,
+  "durationMs": 17000,
+  "crf": 18,
+  "program": "lights_out",
+  "params": {
+    "dimStartMs": 7100,
+    "dimMs": 1100,
+    "blackHoldMs": 800,
+    "nightRiseMs": 2200,
+    "rotY0": 4.2
+  }
+}

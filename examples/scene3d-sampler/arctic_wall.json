@@ -1,0 +1,32 @@
+{
+  "out": ".work/arctic_wall.mp4",
+  "canvas": [
+    1280,
+    720
+  ],
+  "fps": 30,
+  "durationMs": 25000,
+  "crf": 20,
+  "program": "arctic_wall",
+  "params": {
+    "phase": "full",
+    "wallLat": 62,
+    "breachLon": -100,
+    "targetLat": 45,
+    "targetLon": -100,
+    "shrinkT": [
+      6,
+      12
+    ],
+    "breachT": [
+      12,
+      14
+    ],
+    "flowT": [
+      14,
+      22
+    ],
+    "showGrid": false
+  },
+  "keepFrames": false
+}

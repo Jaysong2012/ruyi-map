@@ -1,0 +1,16 @@
+{
+  "out": ".work/solar_system_map.mp4",
+  "canvas": [
+    1920,
+    1080
+  ],
+  "fps": 30,
+  "durationMs": 8000,
+  "crf": 18,
+  "program": "solar_system_map",
+  "params": {
+    "focus": "earth",
+    "push": 1,
+    "orbitPace": 1.6
+  }
+}
